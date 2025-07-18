@@ -1,0 +1,116 @@
+<!DOCTYPE html><html lang="mg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Section Asa</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .job { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    .btn { margin-top: 5px; padding: 5px 10px; background-color: blue; color: white; border: none; cursor: pointer; }
+    .btn:hover { background-color: darkblue; }
+  </style>
+</head>
+<body>
+  <h1>Section Asa</h1>
+  <div id="solde">Solde: 0 Ar</div>
+  <button class="btn" onclick="openRetraitModal()">Retrait</button>
+  <h2>Lisitra Asa</h2>
+  <div id="asa-list"></div>  <!-- Modal preuve -->  <div id="preuveModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000000aa;">
+    <div style="background:#fff; margin:10% auto; padding:20px; width:300px;">
+      <h3>Mandefa Preuve</h3>
+      <input type="text" id="anaranaPreuve" placeholder="Anarana" /><br><br>
+      <input type="text" id="lienPreuve" placeholder="Lien an'ilay profil" /><br><br>
+      <button onclick="envoyerPreuve()">Envoyé</button>
+      <button onclick="closePreuveModal()">Annuler</button>
+    </div>
+  </div>  <!-- Modal Retrait -->  <div id="retraitModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000000aa;">
+    <div style="background:#fff; margin:10% auto; padding:20px; width:300px;">
+      <h3>Retrait</h3>
+      <input type="text" id="anaranaRetrait" placeholder="Anarana" /><br><br>
+      <input type="text" id="numeroRetrait" placeholder="Numéro Téléphone" /><br><br>
+      <button onclick="envoyerRetrait()">Envoyer</button>
+      <button onclick="closeRetraitModal()">Annuler</button>
+    </div>
+  </div>  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, deleteDoc, doc, addDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAC-P6WFH1kqfYQi3PdCWpy4LSUqvtX_vo",
+      authDomain: "mila-vola.firebaseapp.com",
+      projectId: "mila-vola",
+      storageBucket: "mila-vola.firebasestorage.app",
+      messagingSenderId: "690624768352",
+      appId: "1:690624768352:web:668994ef2664c5b99dd605",
+      measurementId: "G-C3FZTKQHFP"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let currentSolde = 0;
+    const soldeDisplay = document.getElementById("solde");
+
+    function updateSoldeDisplay() {
+      soldeDisplay.textContent = `Solde: ${currentSolde} Ar`;
+    }
+
+    const asaList = document.getElementById("asa-list");
+    let selectedJobId = null;
+
+    async function loadJobs() {
+      asaList.innerHTML = "";
+      const querySnapshot = await getDocs(collection(db, "jobs"));
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "job";
+        div.innerHTML = `<strong>${data.title}</strong><p>${data.description}</p><button class='btn' onclick="openPreuveModal('${docSnap.id}')">Envoyé Preuve</button>`;
+        asaList.appendChild(div);
+      });
+    }
+
+    window.openPreuveModal = function(id) {
+      selectedJobId = id;
+      document.getElementById("preuveModal").style.display = "block";
+    };
+    window.closePreuveModal = function() {
+      selectedJobId = null;
+      document.getElementById("preuveModal").style.display = "none";
+    };
+
+    window.envoyerPreuve = async function() {
+      const anarana = document.getElementById("anaranaPreuve").value;
+      const lien = document.getElementById("lienPreuve").value;
+      if (!anarana || !lien || !selectedJobId) return;
+
+      await addDoc(collection(db, "preuves"), { anarana, lien, createdAt: Date.now() });
+      await deleteDoc(doc(db, "jobs", selectedJobId));
+      currentSolde += 50;
+      updateSoldeDisplay();
+      closePreuveModal();
+      loadJobs();
+    };
+
+    window.openRetraitModal = function() {
+      document.getElementById("retraitModal").style.display = "block";
+    };
+    window.closeRetraitModal = function() {
+      document.getElementById("retraitModal").style.display = "none";
+    };
+
+    window.envoyerRetrait = async function() {
+      const nom = document.getElementById("anaranaRetrait").value;
+      const numero = document.getElementById("numeroRetrait").value;
+      if (!nom || !numero || currentSolde <= 0) return;
+
+      await addDoc(collection(db, "retraits"), { nom, numero, montant: currentSolde, createdAt: Date.now(), status: "pending" });
+      currentSolde = 0;
+      updateSoldeDisplay();
+      closeRetraitModal();
+    };
+
+    loadJobs();
+    updateSoldeDisplay();
+  </script></body>
+                                                      </html>

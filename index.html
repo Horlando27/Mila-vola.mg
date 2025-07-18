@@ -1,116 +1,1362 @@
-<!DOCTYPE html><html lang="mg">
+
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Section Asa</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .job { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-    .btn { margin-top: 5px; padding: 5px 10px; background-color: blue; color: white; border: none; cursor: pointer; }
-    .btn:hover { background-color: darkblue; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mila Vola - Plateforme Micro-tâches</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #ff9e00;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section { 
+            display: none; 
+            padding: 20px; 
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-top: 20px;
+        }
+        
+        .active-section { 
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .balance-card { 
+            border-radius: 15px; 
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .balance-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .balance-card.gain { background: linear-gradient(135deg, #4cc9f0, #4895ef); }
+        .balance-card.depot { background: linear-gradient(135deg, #7209b7, #560bad); }
+        
+        .task-card { 
+            margin-bottom: 20px; 
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border: none;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #b5179e);
+            border: none;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            color: rgba(255,255,255,0.85);
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .admin-request {
+            border-left: 4px solid var(--warning);
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #fff9e6;
+        }
+        
+        .proof-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #d4edda; color: #155724; }
+        .status-canceled { background: #f8d7da; color: #721c24; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .transaction-card {
+            border-radius: 10px;
+            margin-bottom: 10px;
+            padding: 15px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        #user-balances {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .balance-change {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .balance-change.positive { color: #28a745; }
+        .balance-change.negative { color: #dc3545; }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-  <h1>Section Asa</h1>
-  <div id="solde">Solde: 0 Ar</div>
-  <button class="btn" onclick="openRetraitModal()">Retrait</button>
-  <h2>Lisitra Asa</h2>
-  <div id="asa-list"></div>  <!-- Modal preuve -->  <div id="preuveModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000000aa;">
-    <div style="background:#fff; margin:10% auto; padding:20px; width:300px;">
-      <h3>Mandefa Preuve</h3>
-      <input type="text" id="anaranaPreuve" placeholder="Anarana" /><br><br>
-      <input type="text" id="lienPreuve" placeholder="Lien an'ilay profil" /><br><br>
-      <button onclick="envoyerPreuve()">Envoyé</button>
-      <button onclick="closePreuveModal()">Annuler</button>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-coins me-2"></i>Mila Vola
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link section-link active" data-section="compte"><i class="fas fa-wallet me-1"></i> Compte</a></li>
+                    <li class="nav-item"><a class="nav-link section-link" data-section="asa"><i class="fas fa-tasks me-1"></i> Asa</a></li>
+                    <li class="nav-item"><a class="nav-link section-link" data-section="publication"><i class="fas fa-plus-circle me-1"></i> Publication</a></li>
+                    <li class="nav-item"><a class="nav-link section-link" data-section="parametres"><i class="fas fa-cog me-1"></i> Paramètres</a></li>
+                    <li class="nav-item"><a class="nav-link section-link" data-section="admin"><i class="fas fa-user-shield me-1"></i> Admin</a></li>
+                </ul>
+                <div id="user-info" class="d-flex align-items-center text-white">
+                    <span id="user-balances" class="me-3 d-flex align-items-center">
+                        <span class="me-2"><i class="fas fa-coins text-warning"></i> <span id="nav-gain">0</span> Ar</span>
+                        <span><i class="fas fa-piggy-bank text-info"></i> <span id="nav-depot">0</span> Ar</span>
+                    </span>
+                    <button id="logout-btn" class="btn btn-sm btn-light">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Section Compte -->
+        <section id="compte" class="section active-section">
+            <h3 class="mb-4"><i class="fas fa-wallet me-2"></i>Mon Compte</h3>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card text-white balance-card gain">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Balance Gain</h5>
+                                    <p id="gain-balance" class="display-4">0 Ar</p>
+                                    <div id="gain-change" class="balance-change"></div>
+                                </div>
+                                <i class="fas fa-coins fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card text-white balance-card depot">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Balance Dépôt</h5>
+                                    <p id="depot-balance" class="display-4">0 Ar</p>
+                                    <div id="depot-change" class="balance-change"></div>
+                                </div>
+                                <i class="fas fa-piggy-bank fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-3 mt-4">
+                <button class="btn btn-danger btn-lg" data-bs-toggle="modal" data-bs-target="#retraitModal">
+                    <i class="fas fa-money-bill-wave me-2"></i> Demander un Retrait
+                </button>
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#depotModal">
+                    <i class="fas fa-piggy-bank me-2"></i> Faire un Dépôt
+                </button>
+            </div>
+            
+            <div class="mt-5">
+                <h4 class="mb-3"><i class="fas fa-history me-2"></i>Historique des Transactions</h4>
+                <div id="transaction-history">
+                    <div class="loader d-none" id="transaction-loader"></div>
+                    <!-- Transactions will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Asa -->
+        <section id="asa" class="section">
+            <h3 class="mb-4"><i class="fas fa-tasks me-2"></i>Tâches Disponibles</h3>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Complétez les tâches et soumettez des preuves pour gagner de l'argent
+            </div>
+            
+            <div id="tasks-container" class="row">
+                <div class="loader d-none" id="tasks-loader"></div>
+                <!-- Tasks will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Section Publication -->
+        <section id="publication" class="section">
+            <h3 class="mb-4"><i class="fas fa-plus-circle me-2"></i>Publier une Nouvelle Tâche</h3>
+            
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i> Votre solde de dépôt doit être suffisant pour couvrir les récompenses des participants
+            </div>
+            
+            <form id="publishForm" class="needs-validation" novalidate>
+                <div class="mb-3">
+                    <label class="form-label">Description de la tâche *</label>
+                    <textarea class="form-control" rows="3" id="taskDescription" required></textarea>
+                    <div class="invalid-feedback">Veuillez entrer une description</div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Budget par participant * (≥ 50 Ar)</label>
+                        <input type="number" class="form-control" id="taskBudget" min="50" required>
+                        <div class="invalid-feedback">Le budget doit être d'au moins 50 Ar</div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nombre de participants maximum</label>
+                        <input type="number" class="form-control" id="maxParticipants" min="1" value="10">
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Lien ou informations *</label>
+                    <input type="url" class="form-control" id="taskUrl" required>
+                    <div class="invalid-feedback">Veuillez fournir un lien ou des informations</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Conditions</label>
+                    <textarea class="form-control" rows="2" id="taskConditions"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 py-3">
+                    <i class="fas fa-paper-plane me-2"></i> Publier la tâche
+                </button>
+            </form>
+            
+            <div class="mt-5">
+                <h4 class="mb-3"><i class="fas fa-list me-2"></i>Mes Tâches Publiées</h4>
+                <div id="my-tasks">
+                    <div class="loader d-none" id="my-tasks-loader"></div>
+                    <!-- User's tasks will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Paramètres -->
+        <section id="parametres" class="section">
+            <h3 class="mb-4"><i class="fas fa-cog me-2"></i>Paramètres du Compte</h3>
+            
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title d-flex align-items-center">
+                        <i class="fas fa-link me-2 text-primary"></i> Votre lien de parrainage
+                    </h5>
+                    <p class="text-muted">
+                        Partagez ce lien pour gagner 5% sur les gains de vos filleuls
+                    </p>
+                    <div class="input-group mb-3">
+                        <input type="text" id="referral-link" class="form-control" readonly>
+                        <button class="btn btn-outline-primary" id="copy-referral">
+                            <i class="fas fa-copy me-1"></i> Copier
+                        </button>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6><i class="fas fa-users me-2 text-success"></i> Vos filleuls (<span id="referral-count">0</span>)</h6>
+                        <div id="referral-list" class="d-flex mt-2">
+                            <!-- Referrals will be shown here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title d-flex align-items-center">
+                        <i class="fas fa-shield-alt me-2 text-warning"></i> Sécurité
+                    </h5>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="notifications" checked>
+                        <label class="form-check-label" for="notifications">Activer les notifications</label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Admin -->
+        <section id="admin" class="section">
+            <h3 class="mb-4"><i class="fas fa-user-shield me-2"></i>Espace Administrateur</h3>
+            
+            <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#deposits-tab">Dépôts <span id="deposit-count" class="badge bg-danger">0</span></button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#withdrawals-tab">Retraits <span id="withdrawal-count" class="badge bg-danger">0</span></button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#proofs-tab">Preuves <span id="proof-count" class="badge bg-danger">0</span></button>
+                </li>
+            </ul>
+            
+            <div class="tab-content mt-3">
+                <div class="tab-pane fade show active" id="deposits-tab">
+                    <div id="deposit-requests">
+                        <div class="loader d-none" id="deposit-requests-loader"></div>
+                        <!-- Deposit requests will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="withdrawals-tab">
+                    <div id="withdrawal-requests">
+                        <div class="loader d-none" id="withdrawal-requests-loader"></div>
+                        <!-- Withdrawal requests will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="proofs-tab">
+                    <div id="proof-submissions">
+                        <div class="loader d-none" id="proof-submissions-loader"></div>
+                        <!-- Proof submissions will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-  </div>  <!-- Modal Retrait -->  <div id="retraitModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000000aa;">
-    <div style="background:#fff; margin:10% auto; padding:20px; width:300px;">
-      <h3>Retrait</h3>
-      <input type="text" id="anaranaRetrait" placeholder="Anarana" /><br><br>
-      <input type="text" id="numeroRetrait" placeholder="Numéro Téléphone" /><br><br>
-      <button onclick="envoyerRetrait()">Envoyer</button>
-      <button onclick="closeRetraitModal()">Annuler</button>
+
+    <!-- Modals -->
+    <!-- Modal Retrait -->
+    <div class="modal fade" id="retraitModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-money-bill-wave me-2"></i>Demande de Retrait</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="retraitForm" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label">Nom Complet *</label>
+                            <input type="text" class="form-control" id="fullName" required>
+                            <div class="invalid-feedback">Veuillez entrer votre nom complet</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Numéro Telma *</label>
+                            <input type="text" class="form-control" id="telmaNumber" pattern="\d{10}" placeholder="0341234567" required>
+                            <div class="invalid-feedback">Veuillez entrer un numéro Telma valide (10 chiffres)</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Montant * (≥ 10,000 Ar)</label>
+                            <input type="number" class="form-control" id="withdrawAmount" min="10000" required>
+                            <div class="invalid-feedback">Le montant minimum est de 10,000 Ar</div>
+                        </div>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i> Frais de 10% seront appliqués: 
+                            <span id="feeAmount">1,000</span> Ar (Total: <span id="totalWithFee">11,000</span> Ar)
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i class="fas fa-paper-plane me-2"></i> Envoyer la demande
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, deleteDoc, doc, addDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAC-P6WFH1kqfYQi3PdCWpy4LSUqvtX_vo",
-      authDomain: "mila-vola.firebaseapp.com",
-      projectId: "mila-vola",
-      storageBucket: "mila-vola.firebasestorage.app",
-      messagingSenderId: "690624768352",
-      appId: "1:690624768352:web:668994ef2664c5b99dd605",
-      measurementId: "G-C3FZTKQHFP"
-    };
+    <!-- Modal Dépôt -->
+    <div class="modal fade" id="depotModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-piggy-bank me-2"></i>Demande de Dépôt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="depotForm" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label">Montant * (≥ 5,000 Ar)</label>
+                            <input type="number" class="form-control" id="depositAmount" min="5000" required>
+                            <div class="invalid-feedback">Le montant minimum est de 5,000 Ar</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Méthode de Paiement *</label>
+                            <select class="form-select" id="paymentMethod" required>
+                                <option value="">Sélectionnez une méthode</option>
+                                <option value="Mvola">Mvola</option>
+                                <option value="Orange Money">Orange Money</option>
+                                <option value="Airtel Money">Airtel Money</option>
+                            </select>
+                            <div class="invalid-feedback">Veuillez sélectionner une méthode de paiement</div>
+                        </div>
+                        
+                        <div id="paymentDetails" class="mb-3 p-3 bg-light rounded d-none">
+                            <p class="mb-1"><strong>Envoyez votre paiement à:</strong></p>
+                            <p id="paymentNumber" class="fw-bold">034 12 345 67</p>
+                            <p class="mb-0"><strong>Nom:</strong> MILA VOLA MG</p>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-paper-plane me-2"></i> Envoyer la demande
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    <!-- Modal Preuve -->
+    <div class="modal fade" id="proofModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-camera me-2"></i>Soumettre une Preuve</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="proofForm">
+                        <input type="hidden" id="taskId">
+                        <div class="mb-3">
+                            <label class="form-label">Votre identifiant * (Email/Instagram)</label>
+                            <input type="text" class="form-control" id="userIdentifier" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Preuve * (Image ou texte)</label>
+                            <input type="file" class="form-control mb-2" id="proofFile" accept="image/*">
+                            <small class="text-muted d-block mb-2">OU</small>
+                            <textarea class="form-control" id="proofText" rows="3" placeholder="Saisissez votre preuve ici..."></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i> Soumettre
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    let currentSolde = 0;
-    const soldeDisplay = document.getElementById("solde");
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAC-P6WFH1kqfYQi3PdCWpy4LSUqvtX_vo",
+            authDomain: "mila-vola.firebaseapp.com",
+            projectId: "mila-vola",
+            storageBucket: "mila-vola.appspot.com",
+            messagingSenderId: "690624768352",
+            appId: "1:690624768352:web:668994ef2664c5b99dd605",
+            measurementId: "G-C3FZTKQHFP"
+        };
 
-    function updateSoldeDisplay() {
-      soldeDisplay.textContent = `Solde: ${currentSolde} Ar`;
-    }
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
 
-    const asaList = document.getElementById("asa-list");
-    let selectedJobId = null;
+        // Références aux collections Firestore
+        const usersRef = db.collection("users");
+        const withdrawalRequestsRef = db.collection("withdrawalRequests");
+        const depositRequestsRef = db.collection("depositRequests");
+        const tasksRef = db.collection("tasks");
+        const submissionsRef = db.collection("submissions");
+        const transactionsRef = db.collection("transactions");
 
-    async function loadJobs() {
-      asaList.innerHTML = "";
-      const querySnapshot = await getDocs(collection(db, "jobs"));
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "job";
-        div.innerHTML = `<strong>${data.title}</strong><p>${data.description}</p><button class='btn' onclick="openPreuveModal('${docSnap.id}')">Envoyé Preuve</button>`;
-        asaList.appendChild(div);
-      });
-    }
+        // État de l'application
+        let currentUser = null;
+        let currentUserId = null;
+        let userData = null;
 
-    window.openPreuveModal = function(id) {
-      selectedJobId = id;
-      document.getElementById("preuveModal").style.display = "block";
-    };
-    window.closePreuveModal = function() {
-      selectedJobId = null;
-      document.getElementById("preuveModal").style.display = "none";
-    };
+        // Initialiser l'application
+        document.addEventListener('DOMContentLoaded', function() {
+            initAuth();
+            initNavigation();
+            initForms();
+            initEvents();
+        });
 
-    window.envoyerPreuve = async function() {
-      const anarana = document.getElementById("anaranaPreuve").value;
-      const lien = document.getElementById("lienPreuve").value;
-      if (!anarana || !lien || !selectedJobId) return;
+        // Gestion de l'authentification
+        function initAuth() {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = user;
+                    currentUserId = user.uid;
+                    document.getElementById('logout-btn').classList.remove('d-none');
+                    loadUserData();
+                } else {
+                    // Connexion anonyme
+                    auth.signInAnonymously()
+                        .then(() => console.log("Utilisateur anonyme connecté"))
+                        .catch(error => console.error("Erreur de connexion anonyme:", error));
+                }
+            });
+        }
 
-      await addDoc(collection(db, "preuves"), { anarana, lien, createdAt: Date.now() });
-      await deleteDoc(doc(db, "jobs", selectedJobId));
-      currentSolde += 50;
-      updateSoldeDisplay();
-      closePreuveModal();
-      loadJobs();
-    };
+        // Charger les données utilisateur
+        function loadUserData() {
+            showLoader('transaction-loader', true);
+            
+            usersRef.doc(currentUserId).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        userData = doc.data();
+                        updateUI();
+                    } else {
+                        // Créer un nouvel utilisateur
+                        userData = {
+                            gainBalance: 0,
+                            depotBalance: 0,
+                            referralCode: generateReferralCode(),
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        
+                        usersRef.doc(currentUserId).set(userData)
+                            .then(() => updateUI())
+                            .catch(error => console.error("Erreur création utilisateur:", error));
+                    }
+                })
+                .catch(error => console.error("Erreur chargement utilisateur:", error));
+        }
 
-    window.openRetraitModal = function() {
-      document.getElementById("retraitModal").style.display = "block";
-    };
-    window.closeRetraitModal = function() {
-      document.getElementById("retraitModal").style.display = "none";
-    };
+        // Générer un code de parrainage
+        function generateReferralCode() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
 
-    window.envoyerRetrait = async function() {
-      const nom = document.getElementById("anaranaRetrait").value;
-      const numero = document.getElementById("numeroRetrait").value;
-      if (!nom || !numero || currentSolde <= 0) return;
+        // Mettre à jour l'interface utilisateur
+        function updateUI() {
+            if (!userData) return;
+            
+            // Mettre à jour les soldes
+            document.getElementById('gain-balance').textContent = userData.gainBalance.toLocaleString() + ' Ar';
+            document.getElementById('depot-balance').textContent = userData.depotBalance.toLocaleString() + ' Ar';
+            document.getElementById('nav-gain').textContent = userData.gainBalance.toLocaleString();
+            document.getElementById('nav-depot').textContent = userData.depotBalance.toLocaleString();
+            
+            // Mettre à jour le lien de parrainage
+            document.getElementById('referral-link').value = 
+                window.location.origin + '?ref=' + userData.referralCode;
+            
+            // Charger l'historique des transactions
+            loadTransactionHistory();
+            
+            // Charger les tâches disponibles
+            loadAvailableTasks();
+            
+            // Charger les tâches de l'utilisateur
+            loadUserTasks();
+        }
 
-      await addDoc(collection(db, "retraits"), { nom, numero, montant: currentSolde, createdAt: Date.now(), status: "pending" });
-      currentSolde = 0;
-      updateSoldeDisplay();
-      closeRetraitModal();
-    };
+        // Initialiser la navigation
+        function initNavigation() {
+            document.querySelectorAll('.section-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    // Mettre à jour la navigation active
+                    document.querySelectorAll('.section-link').forEach(l => 
+                        l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Afficher la section correspondante
+                    const targetSection = this.dataset.section;
+                    document.querySelectorAll('.section').forEach(section => 
+                        section.classList.remove('active-section'));
+                    document.getElementById(targetSection).classList.add('active-section');
+                    
+                    // Charger les données spécifiques à la section
+                    if (targetSection === 'admin') {
+                        loadAdminRequests();
+                    }
+                });
+            });
+        }
 
-    loadJobs();
-    updateSoldeDisplay();
-  </script></body>
-                                                      </html>
+        // Initialiser les formulaires
+        function initForms() {
+            // Validation des formulaires
+            const forms = document.querySelectorAll('.needs-validation');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    
+                    form.classList.add('was-validated');
+                }, false);
+            });
+            
+            // Calcul des frais de retrait
+            document.getElementById('withdrawAmount').addEventListener('input', function() {
+                const amount = parseInt(this.value) || 0;
+                if (amount >= 10000) {
+                    const fee = Math.round(amount * 0.1);
+                    document.getElementById('feeAmount').textContent = fee.toLocaleString();
+                    document.getElementById('totalWithFee').textContent = (amount + fee).toLocaleString();
+                }
+            });
+            
+            // Afficher les détails de paiement
+            document.getElementById('paymentMethod').addEventListener('change', function() {
+                const details = document.getElementById('paymentDetails');
+                const method = this.value;
+                if (method) {
+                    details.classList.remove('d-none');
+                    // Simuler un numéro différent selon la méthode
+                    if (method === 'Mvola') {
+                        document.getElementById('paymentNumber').textContent = '034 12 345 67';
+                    } else if (method === 'Orange Money') {
+                        document.getElementById('paymentNumber').textContent = '032 98 765 43';
+                    } else {
+                        document.getElementById('paymentNumber').textContent = '038 56 789 01';
+                    }
+                } else {
+                    details.classList.add('d-none');
+                }
+            });
+        }
+
+        // Initialiser les événements
+        function initEvents() {
+            // Copie du lien de parrainage
+            document.getElementById('copy-referral').addEventListener('click', function() {
+                const linkInput = document.getElementById('referral-link');
+                linkInput.select();
+                document.execCommand('copy');
+                showAlert('Lien copié dans le presse-papiers!', 'success');
+            });
+            
+            // Déconnexion
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                auth.signOut()
+                    .then(() => {
+                        currentUser = null;
+                        currentUserId = null;
+                        userData = null;
+                        showAlert('Vous avez été déconnecté avec succès', 'info');
+                        document.getElementById('logout-btn').classList.add('d-none');
+                    })
+                    .catch(error => console.error("Erreur de déconnexion:", error));
+            });
+            
+            // Soumission de demande de dépôt
+            document.getElementById('depotForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const amount = parseInt(document.getElementById('depositAmount').value);
+                const method = document.getElementById('paymentMethod').value;
+                
+                if (amount < 5000) {
+                    showAlert('Le montant minimum est de 5,000 Ar', 'danger');
+                    return;
+                }
+                
+                // Ajouter la demande de dépôt
+                depositRequestsRef.add({
+                    userId: currentUserId,
+                    amount: amount,
+                    paymentMethod: method,
+                    status: 'en attente',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then(() => {
+                    showAlert(`Demande de dépôt de ${amount.toLocaleString()} Ar envoyée!`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('depotModal')).hide();
+                    document.getElementById('depotForm').reset();
+                    document.getElementById('depotForm').classList.remove('was-validated');
+                    document.getElementById('paymentDetails').classList.add('d-none');
+                })
+                .catch(error => {
+                    console.error("Erreur demande dépôt:", error);
+                    showAlert('Erreur lors de la demande de dépôt', 'danger');
+                });
+            });
+            
+            // Soumission de demande de retrait
+            document.getElementById('retraitForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const amount = parseInt(document.getElementById('withdrawAmount').value);
+                const fullName = document.getElementById('fullName').value;
+                const telma = document.getElementById('telmaNumber').value;
+                
+                if (amount < 10000) {
+                    showAlert('Le montant minimum est de 10,000 Ar', 'danger');
+                    return;
+                }
+                
+                if (amount > userData.depotBalance) {
+                    showAlert('Solde de dépôt insuffisant', 'danger');
+                    return;
+                }
+                
+                const fee = Math.round(amount * 0.1);
+                const total = amount + fee;
+                
+                // Ajouter la demande de retrait
+                withdrawalRequestsRef.add({
+                    userId: currentUserId,
+                    fullName: fullName,
+                    telmaNumber: telma,
+                    amount: amount,
+                    fee: fee,
+                    total: total,
+                    status: 'en attente',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then(() => {
+                    showAlert(`Demande de retrait de ${amount.toLocaleString()} Ar envoyée!`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('retraitModal')).hide();
+                    document.getElementById('retraitForm').reset();
+                    document.getElementById('retraitForm').classList.remove('was-validated');
+                })
+                .catch(error => {
+                    console.error("Erreur demande retrait:", error);
+                    showAlert('Erreur lors de la demande de retrait', 'danger');
+                });
+            });
+            
+            // Soumission de publication de tâche
+            document.getElementById('publishForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const description = document.getElementById('taskDescription').value;
+                const budget = parseInt(document.getElementById('taskBudget').value);
+                const url = document.getElementById('taskUrl').value;
+                const conditions = document.getElementById('taskConditions').value;
+                const maxParticipants = parseInt(document.getElementById('maxParticipants').value) || 10;
+                
+                if (budget < 50) {
+                    showAlert('Le budget minimum est de 50 Ar par participant', 'danger');
+                    return;
+                }
+                
+                // Vérifier le solde de dépôt
+                if (userData.depotBalance < (budget * maxParticipants)) {
+                    showAlert('Votre solde de dépôt est insuffisant pour cette tâche', 'danger');
+                    return;
+                }
+                
+                // Ajouter la tâche
+                tasksRef.add({
+                    publisherId: currentUserId,
+                    description: description,
+                    budgetPerUser: budget,
+                    url: url,
+                    conditions: conditions,
+                    maxParticipants: maxParticipants,
+                    participants: [],
+                    status: 'active',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then(() => {
+                    showAlert(`Tâche "${description}" publiée avec succès!`, 'success');
+                    document.getElementById('publishForm').reset();
+                    document.getElementById('publishForm').classList.remove('was-validated');
+                    loadUserTasks();
+                })
+                .catch(error => {
+                    console.error("Erreur publication tâche:", error);
+                    showAlert('Erreur lors de la publication de la tâche', 'danger');
+                });
+            });
+            
+            // Soumission de preuve
+            document.getElementById('proofForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const taskId = document.getElementById('taskId').value;
+                const identifier = document.getElementById('userIdentifier').value;
+                const proofFile = document.getElementById('proofFile').files[0];
+                const proofText = document.getElementById('proofText').value;
+                
+                if (!identifier) {
+                    showAlert('Veuillez entrer un identifiant', 'danger');
+                    return;
+                }
+                
+                if (!proofFile && !proofText) {
+                    showAlert('Veuillez fournir une preuve', 'danger');
+                    return;
+                }
+                
+                // Créer la soumission
+                const submission = {
+                    taskId: taskId,
+                    userId: currentUserId,
+                    identifier: identifier,
+                    status: 'en attente',
+                    submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // Ajouter le texte de preuve si fourni
+                if (proofText) {
+                    submission.proofText = proofText;
+                }
+                
+                // Gérer l'upload de fichier si fourni
+                if (proofFile) {
+                    const storageRef = storage.ref(`proofs/${currentUserId}/${Date.now()}_${proofFile.name}`);
+                    storageRef.put(proofFile)
+                        .then(snapshot => snapshot.ref.getDownloadURL())
+                        .then(url => {
+                            submission.proofImageUrl = url;
+                            saveSubmission(submission);
+                        })
+                        .catch(error => {
+                            console.error("Erreur upload fichier:", error);
+                            showAlert('Erreur lors de l\'upload de la preuve', 'danger');
+                        });
+                } else {
+                    saveSubmission(submission);
+                }
+            });
+        }
+
+        // Sauvegarder une soumission de preuve
+        function saveSubmission(submission) {
+            submissionsRef.add(submission)
+                .then(() => {
+                    showAlert('Preuve soumise avec succès!', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('proofModal')).hide();
+                    document.getElementById('proofForm').reset();
+                })
+                .catch(error => {
+                    console.error("Erreur soumission preuve:", error);
+                    showAlert('Erreur lors de la soumission de la preuve', 'danger');
+                });
+        }
+
+        // Charger l'historique des transactions
+        function loadTransactionHistory() {
+            const container = document.getElementById('transaction-history');
+            container.innerHTML = '';
+            
+            transactionsRef.where('userId', '==', currentUserId)
+                .orderBy('date', 'desc')
+                .limit(10)
+                .get()
+                .then(querySnapshot => {
+                    if (querySnapshot.empty) {
+                        container.innerHTML = '<div class="alert alert-info">Aucune transaction récente</div>';
+                        return;
+                    }
+                    
+                    querySnapshot.forEach(doc => {
+                        const transaction = doc.data();
+                        const transactionEl = document.createElement('div');
+                        transactionEl.className = 'transaction-card fade-in';
+                        
+                        const typeClass = transaction.type === 'dépôt' ? 'text-success' : 'text-danger';
+                        const sign = transaction.type === 'dépôt' ? '+' : '-';
+                        
+                        transactionEl.innerHTML = `
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6>${transaction.type}</h6>
+                                    <small class="text-muted">${new Date(transaction.date.seconds * 1000).toLocaleString()}</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="${typeClass}">${sign}${transaction.amount.toLocaleString()} Ar</div>
+                                    <span class="status-badge status-confirmed">${transaction.status}</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        container.appendChild(transactionEl);
+                    });
+                })
+                .catch(error => {
+                    console.error("Erreur chargement transactions:", error);
+                    container.innerHTML = '<div class="alert alert-danger">Erreur de chargement des transactions</div>';
+                })
+                .finally(() => {
+                    showLoader('transaction-loader', false);
+                });
+        }
+
+        // Charger les tâches disponibles
+        function loadAvailableTasks() {
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = '';
+            showLoader('tasks-loader', true);
+            
+            tasksRef.where('status', '==', 'active').get()
+                .then(querySnapshot => {
+                    if (querySnapshot.empty) {
+                        container.innerHTML = '<div class="alert alert-info">Aucune tâche disponible pour le moment</div>';
+                        return;
+                    }
+                    
+                    querySnapshot.forEach(doc => {
+                        const task = doc.data();
+                        const taskId = doc.id;
+                        
+                        // Vérifier si l'utilisateur a déjà participé
+                        const hasParticipated = task.participants && task.participants.includes(currentUserId);
+                        
+                        const taskEl = document.createElement('div');
+                        taskEl.className = 'col-md-6';
+                        taskEl.innerHTML = `
+                            <div class="card task-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h5 class="card-title">${task.description}</h5>
+                                        <span class="badge bg-success">${task.budgetPerUser.toLocaleString()} Ar</span>
+                                    </div>
+                                    <p class="card-text">
+                                        <strong>Lien:</strong> <a href="${task.url}" target="_blank">${task.url}</a>
+                                    </p>
+                                    <p class="card-text">${task.conditions || 'Aucune condition spécifique'}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">${task.participants ? task.participants.length : 0} participants</small>
+                                        <button class="btn btn-sm btn-primary submit-proof-btn" data-task-id="${taskId}" ${hasParticipated ? 'disabled' : ''}>
+                                            <i class="fas fa-paper-plane me-1"></i> ${hasParticipated ? 'Déjà participé' : 'Participer'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        container.appendChild(taskEl);
+                    });
+                    
+                    // Ajouter les écouteurs d'événements pour les boutons de participation
+                    document.querySelectorAll('.submit-proof-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const taskId = btn.dataset.taskId;
+                            document.getElementById('taskId').value = taskId;
+                            const proofModal = new bootstrap.Modal(document.getElementById('proofModal'));
+                            proofModal.show();
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error("Erreur chargement tâches:", error);
+                    container.innerHTML = '<div class="alert alert-danger">Erreur de chargement des tâches</div>';
+                })
+                .finally(() => {
+                    showLoader('tasks-loader', false);
+                });
+        }
+
+        // Charger les tâches de l'utilisateur
+        function loadUserTasks() {
+            const container = document.getElementById('my-tasks');
+            container.innerHTML = '';
+            showLoader('my-tasks-loader', true);
+            
+            tasksRef.where('publisherId', '==', currentUserId).get()
+                .then(querySnapshot => {
+                    if (querySnapshot.empty) {
+                        container.innerHTML = '<div class="alert alert-info">Vous n\'avez pas encore publié de tâches</div>';
+                        return;
+                    }
+                    
+                    querySnapshot.forEach(doc => {
+                        const task = doc.data();
+                        const taskId = doc.id;
+                        
+                        const taskEl = document.createElement('div');
+                        taskEl.className = 'card task-card mb-3 fade-in';
+                        taskEl.innerHTML = `
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h5 class="card-title">${task.description}</h5>
+                                    <span class="badge bg-success">${task.budgetPerUser.toLocaleString()} Ar</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <div>
+                                        <span class="badge bg-primary me-2">${task.status}</span>
+                                        <span class="badge bg-secondary">${task.participants ? task.participants.length : 0} participants</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        container.appendChild(taskEl);
+                    });
+                })
+                .catch(error => {
+                    console.error("Erreur chargement tâches utilisateur:", error);
+                    container.innerHTML = '<div class="alert alert-danger">Erreur de chargement de vos tâches</div>';
+                })
+                .finally(() => {
+                    showLoader('my-tasks-loader', false);
+                });
+        }
+
+        // Charger les demandes d'administration
+        function loadAdminRequests() {
+            // Dépôts
+            showLoader('deposit-requests-loader', true);
+            depositRequestsRef.where('status', '==', 'en attente').get()
+                .then(querySnapshot => {
+                    const container = document.getElementById('deposit-requests');
+                    container.innerHTML = '';
+                    document.getElementById('deposit-count').textContent = querySnapshot.size;
+                    
+                    if (querySnapshot.empty) {
+                        container.innerHTML = '<div class="alert alert-info">Aucune demande de dépôt en attente</div>';
+                        return;
+                    }
+                    
+                    querySnapshot.forEach(doc => {
+                        const request = doc.data();
+                        const requestId = doc.id;
+                        
+                        const requestEl = document.createElement('div');
+                        requestEl.className = 'admin-request';
+                        requestEl.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>Dépôt de ${request.amount.toLocaleString()} Ar</h6>
+                                    <p class="mb-1">Méthode: ${request.paymentMethod}</p>
+                                    <p class="mb-0">Utilisateur: ${request.userId.substring(0,8)}</p>
+                                </div>
+                                <div>
+                                    <span class="status-badge status-pending">En attente</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 d-flex gap-2">
+                                <button class="btn btn-success btn-sm confirm-btn" data-type="deposit" data-id="${requestId}">
+                                    <i class="fas fa-check me-1"></i> Confirmer
+                                </button>
+                                <button class="btn btn-danger btn-sm cancel-btn" data-type="deposit" data-id="${requestId}">
+                                    <i class="fas fa-times me-1"></i> Annuler
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(requestEl);
+                    });
+                    
+                    // Ajouter les gestionnaires d'événements
+                    addAdminEventListeners();
+                })
+                .catch(error => console.error("Erreur chargement dépôts:", error))
+                .finally(() => showLoader('deposit-requests-loader', false));
+            
+            // Retraits
+            showLoader('withdrawal-requests-loader', true);
+            withdrawalRequestsRef.where('status', '==', 'en attente').get()
+                .then(querySnapshot => {
+                    const container = document.getElementById('withdrawal-requests');
+                    container.innerHTML = '';
+                    document.getElementById('withdrawal-count').textContent = querySnapshot.size;
+                    
+                    if (querySnapshot.empty) {
+                        container.innerHTML = '<div class="alert alert-info">Aucune demande de retrait en attente</div>';
+                        return;
+                    }
+                    
+                    querySnapshot.forEach(doc => {
+                        const request = doc.data();
+                        const requestId = doc.id;
+                        
+                        const requestEl = document.createElement('div');
+                        requestEl.className = 'admin-request';
+                        requestEl.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>Retrait de ${request.amount.toLocaleString()} Ar</h6>
+                                    <p class="mb-1">Telma: ${request.telmaNumber}</p>
+                                    <p class="mb-0">Frais: ${request.fee.toLocaleString()} Ar</p>
+                                </div>
+                                <div>
+                                    <span class="status-badge status-pending">En attente</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 d-flex gap-2">
+                                <button class="btn btn-success btn-sm confirm-btn" data-type="withdrawal" data-id="${requestId}">
+                                    <i class="fas fa-check me-1"></i> Confirmer
+                                </button>
+                                <button class="btn btn-danger btn-sm cancel-btn" data-type="withdrawal" data-id="${requestId}">
+                                    <i class="fas fa-times me-1"></i> Annuler
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(requestEl);
+                    });
+                    
+                    // Ajouter les gestionnaires d'événements
+                    addAdminEventListeners();
+                })
+                .catch(error => console.error("Erreur chargement retraits:", error))
+                .finally(() => showLoader('withdrawal-requests-loader', false));
+            
+            // Preuves
+            showLoader('proof-submissions-loader', true);
+            submissionsRef.where('status', '==', 'en attente').get()
+                .then(querySnapshot => {
+                    const container = document.getElementById('proof-submissions');
+                    container.innerHTML = '';
+                    document.getElementById('proof-count').textContent = querySnapshot.size;
+                    
+                    if (querySnapshot.empty) {
+                        container.innerHTML = '<div class="alert alert-info">Aucune soumission de preuve en attente</div>';
+                        return;
+                    }
+                    
+                    querySnapshot.forEach(doc => {
+                        const submission = doc.data();
+                        const submissionId = doc.id;
+                        
+                        const requestEl = document.createElement('div');
+                        requestEl.className = 'admin-request';
+                        requestEl.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>Soumission de preuve</h6>
+                                    <p class="mb-1">Tâche: ${submission.taskId.substring(0,8)}</p>
+                                    <p class="mb-0">Identifiant: ${submission.identifier}</p>
+                                </div>
+                                <div>
+                                    <span class="status-badge status-pending">En attente</span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <p class="mb-1"><strong>Preuve:</strong></p>
+                                <p>${submission.proofText || 'Preuve textuelle'}</p>
+                                ${submission.proofImageUrl ? 
+                                    `<img src="${submission.proofImageUrl}" class="proof-preview img-fluid">` : ''}
+                            </div>
+                            <div class="mt-3 d-flex gap-2">
+                                <button class="btn btn-success btn-sm confirm-btn" data-type="submission" data-id="${submissionId}">
+                                    <i class="fas fa-check me-1"></i> Confirmer
+                                </button>
+                                <button class="btn btn-danger btn-sm cancel-btn" data-type="submission" data-id="${submissionId}">
+                                    <i class="fas fa-times me-1"></i> Annuler
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(requestEl);
+                    });
+                    
+                    // Ajouter les gestionnaires d'événements
+                    addAdminEventListeners();
+                })
+                .catch(error => console.error("Erreur chargement preuves:", error))
+                .finally(() => showLoader('proof-submissions-loader', false));
+        }
+
+        // Ajouter les gestionnaires d'événements pour les actions admin
+        function addAdminEventListeners() {
+            document.querySelectorAll('.confirm-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const type = btn.dataset.type;
+                    const id = btn.dataset.id;
+                    processAdminRequest(type, id, 'confirmé');
+                });
+            });
+            
+            document.querySelectorAll('.cancel-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const type = btn.dataset.type;
+                    const id = btn.dataset.id;
+                    processAdminRequest(type, id, 'annulé');
+                });
+            });
+        }
+
+        // Traiter une demande admin
+        function processAdminRequest(type, id, action) {
+            let requestRef;
+            
+            if (type === 'deposit') {
+                requestRef = depositRequestsRef.doc(id);
+            } else if (type === 'withdrawal') {
+                requestRef = withdrawalRequestsRef.doc(id);
+            } else if (type === 'submission') {
+                requestRef = submissionsRef.doc(id);
+            }
+            
+            if (!requestRef) return;
+            
+            // Mettre à jour le statut de la demande
+            requestRef.update({ status: action })
+                .then(() => {
+                    showAlert(`Demande ${action} avec succès`, 'success');
+                    
+                    // Si confirmation, mettre à jour les soldes
+                    if (action === 'confirmé') {
+                        requestRef.get().then(doc => {
+                            const request = doc.data();
+                            
+                            if (type === 'deposit') {
+                                // Créditer le solde de dépôt
+                                usersRef.doc(request.userId).update({
+                                    depotBalance: firebase.firestore.FieldValue.increment(request.amount)
+                                });
+                                
+                                // Ajouter une transaction
+                                transactionsRef.add({
+                                    userId: request.userId,
+                                    type: 'dépôt',
+                                    amount: request.amount,
+                                    status: 'confirmé',
+                                    date: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            }
+                            else if (type === 'withdrawal') {
+                                // Débiter le solde de dépôt
+                                usersRef.doc(request.userId).update({
+                                    depotBalance: firebase.firestore.FieldValue.increment(-request.total)
+                                });
+                                
+                                // Ajouter une transaction
+                                transactionsRef.add({
+                                    userId: request.userId,
+                                    type: 'retrait',
+                                    amount: request.amount,
+                                    fee: request.fee,
+                                    status: 'confirmé',
+                                    date: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            }
+                            else if (type === 'submission') {
+                                // Créditer le solde de gain
+                                usersRef.doc(request.userId).update({
+                                    gainBalance: firebase.firestore.FieldValue.increment(50)
+                                });
+                                
+                                // Ajouter une transaction
+                                transactionsRef.add({
+                                    userId: request.userId,
+                                    type: 'gain',
+                                    amount: 50,
+                                    status: 'confirmé',
+                                    date: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                                
+                                // Ajouter le participant à la tâche
+                                tasksRef.doc(request.taskId).update({
+                                    participants: firebase.firestore.FieldValue.arrayUnion(request.userId)
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Recharger les demandes admin
+                    loadAdminRequests();
+                })
+                .catch(error => {
+                    console.error(`Erreur traitement demande ${type}:`, error);
+                    showAlert('Erreur lors du traitement de la demande', 'danger');
+                });
+        }
+
+        // Afficher/cacher le loader
+        function showLoader(loaderId, show) {
+            const loader = document.getElementById(loaderId);
+            if (loader) {
+                loader.classList.toggle('d-none', !show);
+            }
+        }
+
+        // Afficher une alerte
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+            alert.style.zIndex = '1050';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // Supprimer l'alerte après 3 secondes
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -684,60 +684,36 @@
       margin-right: 12px;
     }
     
-    /* Team List */
-    .team-list {
-      margin-top: 1.5rem;
+    .social-icon {
+      font-size: 1.5rem;
+      margin-right: 10px;
+      vertical-align: middle;
     }
     
-    .team-list h5 {
-      margin-bottom: 1rem;
-      color: var(--secondary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .facebook { color: #3b5998; }
+    .twitter { color: #1da1f2; }
+    .instagram { color: #e1306c; }
+    .telegram { color: #0088cc; }
+    .website { color: var(--primary); }
     
-    .team-member {
-      display: flex;
-      align-items: center;
-      padding: 0.75rem 1rem;
-      background: white;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      margin-bottom: 0.75rem;
-      transition: var(--transition);
-    }
-    
-    .team-member:hover {
-      transform: translateX(5px);
-      box-shadow: var(--box-shadow-hover);
-    }
-    
-    .team-member-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+    .task-type-badge {
+      position: absolute;
+      top: 15px;
+      left: 15px;
       background: var(--primary-light);
       color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      margin-right: 12px;
-    }
-    
-    .team-member-info {
-      flex: 1;
-    }
-    
-    .team-member-name {
-      font-weight: 500;
-      color: var(--gray-800);
-    }
-    
-    .team-member-date {
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
       font-size: 0.8rem;
-      color: var(--gray-600);
+      font-weight: 600;
+    }
+    
+    .social-task {
+      border-left: 4px solid #3b5998;
+    }
+    
+    .website-task {
+      border-left: 4px solid var(--primary);
     }
     
     @media (max-width: 768px) {
@@ -963,12 +939,14 @@
             <div class="balance-card gain-card">
               <div class="balance-label">Solde de Gains</div>
               <div id="gainBalance" class="balance-amount">0 Ar</div>
+              <div class="mt-2 small">Ce solde peut être retiré</div>
             </div>
           </div>
           <div class="col-md-6">
             <div class="balance-card deposit-card">
               <div class="balance-label">Solde de Dépôt</div>
               <div id="depositBalance" class="balance-amount">0 Ar</div>
+              <div class="mt-2 small">Utilisé pour publier des tâches</div>
             </div>
           </div>
         </div>
@@ -1008,20 +986,43 @@
               <label class="form-label">Description de la tâche</label>
               <textarea id="pubDescription" class="form-control mb-2" placeholder="Décrivez la tâche à réaliser" rows="3" required></textarea>
             </div>
+            
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label">Budget (≥ 50 Ar)</label>
                 <input id="pubBudget" type="number" class="form-control" placeholder="Ex: 100" required>
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label">URL/Information</label>
-                <input id="pubURL" type="text" class="form-control" placeholder="Lien ou référence">
+                <label class="form-label">Type de tâche</label>
+                <select id="taskType" class="form-select" required>
+                  <option value="">Choisir un type</option>
+                  <option value="social">Réseau social</option>
+                  <option value="website">Inscription site web</option>
+                </select>
               </div>
             </div>
+            
+            <div class="mb-3" id="socialMediaContainer" style="display:none;">
+              <label class="form-label">Réseau social</label>
+              <select id="socialMedia" class="form-select">
+                <option value="">Sélectionner un réseau</option>
+                <option value="facebook">Facebook</option>
+                <option value="twitter">Twitter</option>
+                <option value="instagram">Instagram</option>
+                <option value="telegram">Télégramme</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">URL/Information</label>
+              <input id="pubURL" type="text" class="form-control" placeholder="Lien ou référence" required>
+            </div>
+            
             <div class="mb-3">
               <label class="form-label">Conditions</label>
               <textarea id="pubConditions" class="form-control" placeholder="Conditions à respecter" rows="2"></textarea>
             </div>
+            
             <button class="btn btn-primary btn-action">
               <i class="fas fa-paper-plane me-1"></i> Publier la tâche
             </button>
@@ -1061,17 +1062,6 @@
             <button class="btn btn-primary" onclick="shareReferral()" style="background: var(--primary); border: none; padding: 0.75rem 1.5rem; font-weight: 600; border-radius: 10px;">
               <i class="fas fa-share-alt me-1"></i> Partager
             </button>
-          </div>
-          
-          <!-- Liste de l'équipe (parrainés) -->
-          <div class="team-list">
-            <h5><i class="fas fa-users me-2"></i>Votre Équipe</h5>
-            <div id="teamMembers">
-              <div class="empty-state py-3">
-                <i class="fas fa-user-plus"></i>
-                <p>Aucun membre dans votre équipe pour le moment</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -1129,6 +1119,7 @@
                 <label class="form-label">Montant (≥ 10000 Ar)</label>
                 <input id="withdrawAmount" type="number" class="form-control" placeholder="Ex: 20000" required>
                 <div class="form-text">Frais: 10% du montant</div>
+                <div class="form-text text-danger">Attention: Seul le solde de gains peut être retiré</div>
               </div>
             </div>
             <div class="modal-footer">
@@ -1215,6 +1206,17 @@
     const appContainer = document.getElementById('appContainer');
     const logoutBtn = document.getElementById('logoutBtn');
     const welcomeMessage = document.getElementById('welcomeMessage');
+    const taskTypeSelect = document.getElementById('taskType');
+    const socialMediaContainer = document.getElementById('socialMediaContainer');
+
+    // Gestion du type de tâche
+    taskTypeSelect.addEventListener('change', function() {
+      if (this.value === 'social') {
+        socialMediaContainer.style.display = 'block';
+      } else {
+        socialMediaContainer.style.display = 'none';
+      }
+    });
 
     // Fonction pour afficher une section
     window.showSection = (sectionId) => {
@@ -1235,8 +1237,6 @@
         loadTasks();
       } else if (sectionId === 'publicationSection' && isAdmin) {
         loadPublications();
-      } else if (sectionId === 'settingsSection') {
-        loadTeamMembers();
       }
     };
 
@@ -1300,8 +1300,7 @@
             depot: 0,
             createdAt: serverTimestamp(),
             isAdmin: adminAccess,
-            completedTasks: [], // Liste des tâches complétées
-            referredBy: document.referrerUserId || null // Référencement
+            completedTasks: [] // Liste des tâches complétées
           });
         }
         
@@ -1410,8 +1409,18 @@
       const phone = document.getElementById("withdrawPhone").value;
       const montant = parseFloat(document.getElementById("withdrawAmount").value);
       
-      if (montant >= 10000) {
-        try {
+      try {
+        // Vérifier le solde de gains
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.data();
+        
+        if (montant > userData.gain) {
+          alert("Solde de gains insuffisant. Vous ne pouvez retirer que votre solde de gains.");
+          return;
+        }
+        
+        if (montant >= 10000) {
           const frais = montant * 0.1;
           await addDoc(collection(db, "retrait_requests"), {
             userId, userName, nom, phone, montant, frais,
@@ -1422,11 +1431,11 @@
           // Reset form and close modal
           e.target.reset();
           bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
-        } catch (error) {
-          alert("Erreur lors du retrait: " + error.message);
+        } else {
+          alert("Tsara indrindra ny ≥ 10000 Ar");
         }
-      } else {
-        alert("Tsara indrindra ny ≥ 10000 Ar");
+      } catch (error) {
+        alert("Erreur lors du retrait: " + error.message);
       }
     });
 
@@ -1466,12 +1475,52 @@
           
           const el = document.createElement('div');
           el.className = isCompleted ? 'col-md-4 mb-3 completed-task' : 'col-md-4 mb-3';
+          
+          let icon = '';
+          let typeBadge = '';
+          let borderClass = '';
+          
+          if (d.taskType === 'social') {
+            switch(d.socialMedia) {
+              case 'facebook':
+                icon = '<i class="fab fa-facebook social-icon facebook"></i>';
+                typeBadge = '<span class="task-type-badge">Facebook</span>';
+                borderClass = 'social-task';
+                break;
+              case 'twitter':
+                icon = '<i class="fab fa-twitter social-icon twitter"></i>';
+                typeBadge = '<span class="task-type-badge">Twitter</span>';
+                borderClass = 'social-task';
+                break;
+              case 'instagram':
+                icon = '<i class="fab fa-instagram social-icon instagram"></i>';
+                typeBadge = '<span class="task-type-badge">Instagram</span>';
+                borderClass = 'social-task';
+                break;
+              case 'telegram':
+                icon = '<i class="fab fa-telegram social-icon telegram"></i>';
+                typeBadge = '<span class="task-type-badge">Télégramme</span>';
+                borderClass = 'social-task';
+                break;
+            }
+          } else if (d.taskType === 'website') {
+            icon = '<i class="fas fa-globe social-icon website"></i>';
+            typeBadge = '<span class="task-type-badge">Inscription site</span>';
+            borderClass = 'website-task';
+          }
+          
           el.innerHTML = `
-            <div class="task-card card">
+            <div class="task-card card ${borderClass}">
               <div class="card-body">
+                ${typeBadge}
                 <span class="task-badge">${d.budget} Ar</span>
-                <h6 class="card-title">${d.description}</h6>
+                <h6 class="card-title">${icon} ${d.description}</h6>
                 <small class="d-block text-muted mb-2">Conditions: ${d.cond || 'Aucune'}</small>
+                <div class="mt-2">
+                  <a href="${d.url}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-external-link-alt me-1"></i> Accéder à la tâche
+                  </a>
+                </div>
                 ${isCompleted ? '' : `
                 <button class='btn btn-primary w-100 mt-3' onclick='openProofModal("${taskId}")'>
                   <i class="fas fa-paper-plane me-1"></i> Envoyer preuve
@@ -1545,13 +1594,47 @@
           const d = docSnap.data();
           const el = document.createElement('div');
           el.className = 'col-md-6 mb-3';
+          
+          let icon = '';
+          let typeText = '';
+          
+          if (d.taskType === 'social') {
+            switch(d.socialMedia) {
+              case 'facebook': 
+                icon = '<i class="fab fa-facebook social-icon facebook"></i>';
+                typeText = 'Réseau social: Facebook';
+                break;
+              case 'twitter': 
+                icon = '<i class="fab fa-twitter social-icon twitter"></i>';
+                typeText = 'Réseau social: Twitter';
+                break;
+              case 'instagram': 
+                icon = '<i class="fab fa-instagram social-icon instagram"></i>';
+                typeText = 'Réseau social: Instagram';
+                break;
+              case 'telegram': 
+                icon = '<i class="fab fa-telegram social-icon telegram"></i>';
+                typeText = 'Réseau social: Télégramme';
+                break;
+            }
+          } else if (d.taskType === 'website') {
+            icon = '<i class="fas fa-globe social-icon website"></i>';
+            typeText = 'Inscription site web';
+          }
+          
           el.innerHTML = `
             <div class="card task-card">
               <div class="card-body">
-                <h6>${d.description}</h6>
+                <h6>${icon} ${d.description}</h6>
                 <div class="d-flex justify-content-between align-items-center mt-2">
                   <span class="badge bg-warning">${d.budget} Ar</span>
                   <span class="badge bg-success">Active</span>
+                </div>
+                <div class="mt-2 small">${typeText}</div>
+                <div class="mt-2">
+                  <a href="${d.url}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-external-link-alt me-1"></i> Voir la tâche
+                  </a>
                 </div>
               </div>
             </div>
@@ -1569,23 +1652,45 @@
       const budget = parseInt(document.getElementById('pubBudget').value);
       const url = document.getElementById('pubURL').value;
       const cond = document.getElementById('pubConditions').value;
+      const taskType = document.getElementById('taskType').value;
+      const socialMedia = document.getElementById('socialMedia').value;
       
-      if (budget >= 50) {
-        try {
-          await addDoc(collection(db,'tasks'),{
-            publisher:userId, publisherName: userName, description:desc, budget, url, cond,
-            status:'active', createdAt:serverTimestamp()
-          });
-          alert('Asa navoaka!');
-          loadPublications();
-          
-          // Reset form
-          e.target.reset();
-        } catch (error) {
-          alert("Erreur lors de la publication: " + error.message);
-        }
-      } else {
+      if (budget < 50) {
         alert('Budget ≥ 50 Ar');
+        return;
+      }
+      
+      if (!taskType) {
+        alert('Sélectionnez un type de tâche');
+        return;
+      }
+      
+      if (taskType === 'social' && !socialMedia) {
+        alert('Sélectionnez un réseau social');
+        return;
+      }
+      
+      try {
+        await addDoc(collection(db,'tasks'),{
+          publisher: userId,
+          publisherName: userName,
+          description: desc,
+          budget,
+          url,
+          cond,
+          taskType,
+          socialMedia: taskType === 'social' ? socialMedia : '',
+          status: 'active',
+          createdAt: serverTimestamp()
+        });
+        alert('Asa navoaka!');
+        loadPublications();
+        
+        // Reset form
+        e.target.reset();
+        socialMediaContainer.style.display = 'none';
+      } catch (error) {
+        alert("Erreur lors de la publication: " + error.message);
       }
     });
 
@@ -1731,46 +1836,6 @@
       });
     }
 
-    // --- Section Paramètres: Équipe de parrainage ---
-    async function loadTeamMembers() {
-      try {
-        const teamContainer = document.getElementById('teamMembers');
-        teamContainer.innerHTML = '';
-        
-        // Récupérer les utilisateurs qui ont été parrainés par l'utilisateur actuel
-        const q = query(collection(db, "users"), where("referredBy", "==", userId));
-        const snap = await getDocs(q);
-        
-        if (snap.empty) {
-          teamContainer.innerHTML = `
-            <div class="empty-state py-3">
-              <i class="fas fa-user-plus"></i>
-              <p>Aucun membre dans votre équipe pour le moment</p>
-            </div>
-          `;
-          return;
-        }
-        
-        snap.forEach(docSnap => {
-          const d = docSnap.data();
-          const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : 'Date inconnue';
-          
-          const el = document.createElement('div');
-          el.className = 'team-member fade-in';
-          el.innerHTML = `
-            <div class="team-member-avatar">${d.name.charAt(0)}</div>
-            <div class="team-member-info">
-              <div class="team-member-name">${d.name}</div>
-              <div class="team-member-date">Inscrit le: ${date}</div>
-            </div>
-          `;
-          teamContainer.appendChild(el);
-        });
-      } catch (error) {
-        console.error("Error loading team members:", error);
-      }
-    }
-
     // Fonctions pour le parrainage
     function copyReferralLink() {
       const link = document.getElementById('referralLink');
@@ -1797,7 +1862,6 @@
       const urlParams = new URLSearchParams(window.location.search);
       const ref = urlParams.get('ref');
       if (ref) {
-        document.referrerUserId = ref; // Stocker pour l'utiliser lors de l'inscription
         document.getElementById('securityCode').value = ref;
         alert('Vous avez été invité par un parrain! Utilisez le code d\'accès pour bénéficier des avantages.');
       }

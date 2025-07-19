@@ -695,6 +695,7 @@
     .instagram { color: #e1306c; }
     .telegram { color: #0088cc; }
     .website { color: var(--primary); }
+    .whatsapp { color: #25D366; }
     
     .task-type-badge {
       position: absolute;
@@ -714,6 +715,71 @@
     
     .website-task {
       border-left: 4px solid var(--primary);
+    }
+    
+    .whatsapp-btn {
+      background: #25D366 !important;
+      color: white !important;
+      border-radius: 50px;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      margin-top: 15px;
+      width: 100%;
+      justify-content: center;
+      transition: var(--transition);
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    }
+    
+    .whatsapp-btn:hover {
+      background: #128C7E !important;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: var(--border-radius);
+      background: var(--success);
+      color: white;
+      box-shadow: var(--box-shadow);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.5s, fadeOut 0.5s 2.5s forwards;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    
+    .proof-container {
+      background: var(--primary-light);
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin-top: 1rem;
+      border: 1px dashed var(--primary);
+    }
+    
+    .proof-title {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     @media (max-width: 768px) {
@@ -824,6 +890,8 @@
     <div id="firebaseStatus" class="firebase-status status-connected">
       <i class="fas fa-circle-check"></i> Firebase Connected
     </div>
+
+    <div id="notificationArea"></div>
 
     <div class="container">
       <!-- Stats Section -->
@@ -1149,6 +1217,14 @@
                 <textarea id="userProof" class="form-control" placeholder="Texte ou URL d'image" rows="3" required></textarea>
                 <div class="form-text">Fournissez un lien ou décrivez votre preuve</div>
               </div>
+              
+              <div class="proof-container">
+                <p class="proof-title"><i class="fas fa-info-circle"></i> Envoyer une capture d'écran par WhatsApp</p>
+                <a href="https://wa.me/261384557584" target="_blank" class="btn whatsapp-btn">
+                  <i class="fab fa-whatsapp"></i> Envoyer par WhatsApp
+                </a>
+                <p class="mt-2 small">Après avoir envoyé votre capture d'écran sur WhatsApp, soumettez votre nom ci-dessus pour que nous puissions vous créditer.</p>
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -1390,16 +1466,16 @@
             userId, userName, montant, method,
             status: "en attente", createdAt: serverTimestamp()
           });
-          alert("Dépôt voaray! Votre demande est en cours de traitement.");
+          showNotification("Dépôt voaray! Votre demande est en cours de traitement.", "success");
           
           // Reset form and close modal
           e.target.reset();
           bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
         } catch (error) {
-          alert("Erreur lors du dépôt: " + error.message);
+          showNotification("Erreur lors du dépôt: " + error.message, "danger");
         }
       } else {
-        alert("Ampidiro araka ny tokony ho izy ny vola (min 5000 Ar) sy fomba fandoavana.");
+        showNotification("Ampidiro araka ny tokony ho izy ny vola (min 5000 Ar) sy fomba fandoavana.", "warning");
       }
     });
 
@@ -1416,7 +1492,7 @@
         const userData = userSnap.data();
         
         if (montant > userData.gain) {
-          alert("Solde de gains insuffisant. Vous ne pouvez retirer que votre solde de gains.");
+          showNotification("Solde de gains insuffisant. Vous ne pouvez retirer que votre solde de gains.", "warning");
           return;
         }
         
@@ -1426,16 +1502,16 @@
             userId, userName, nom, phone, montant, frais,
             status: "en attente", createdAt: serverTimestamp()
           });
-          alert("Retrait voaray! Votre demande est en cours de traitement.");
+          showNotification("Retrait voaray! Votre demande est en cours de traitement.", "success");
           
           // Reset form and close modal
           e.target.reset();
           bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
         } else {
-          alert("Tsara indrindra ny ≥ 10000 Ar");
+          showNotification("Tsara indrindra ny ≥ 10000 Ar", "warning");
         }
       } catch (error) {
-        alert("Erreur lors du retrait: " + error.message);
+        showNotification("Erreur lors du retrait: " + error.message, "danger");
       }
     });
 
@@ -1543,23 +1619,33 @@
       const proof = document.getElementById("userProof").value;
       
       if (!taskId || !name || !proof) {
-        alert("Ampidiro ny angona rehetra");
+        showNotification("Ampidiro ny angona rehetra", "warning");
         return;
       }
       
       try {
-        const key = `${userId}_${taskId}`;
-        await setDoc(doc(db,"submissions",key),{
+        // Vérifier si l'utilisateur a déjà soumis une preuve pour cette tâche
+        const submissionKey = `${userId}_${taskId}`;
+        const submissionRef = doc(db, "submissions", submissionKey);
+        const submissionSnap = await getDoc(submissionRef);
+        
+        if (submissionSnap.exists()) {
+          showNotification("Vous avez déjà soumis une preuve pour cette tâche.", "warning");
+          return;
+        }
+        
+        await setDoc(submissionRef, {
           userId, userName, taskId, name, proof,
-          status:"en attente", createdAt: serverTimestamp()
+          status: "en attente", createdAt: serverTimestamp()
         });
-        alert("Porofo nalefa! Ny mpitantana dia handinika azy.");
+        
+        showNotification("Porofo nalefa! Ny mpitantana dia handinika azy.", "success");
         
         // Reset form and close modal
         e.target.reset();
         bootstrap.Modal.getInstance(document.getElementById('proofModal')).hide();
       } catch (error) {
-        alert("Erreur lors de l'envoi de la preuve: " + error.message);
+        showNotification("Erreur lors de l'envoi de la preuve: " + error.message, "danger");
       }
     });
 
@@ -1656,21 +1742,37 @@
       const socialMedia = document.getElementById('socialMedia').value;
       
       if (budget < 50) {
-        alert('Budget ≥ 50 Ar');
+        showNotification('Budget ≥ 50 Ar', 'warning');
         return;
       }
       
       if (!taskType) {
-        alert('Sélectionnez un type de tâche');
+        showNotification('Sélectionnez un type de tâche', 'warning');
         return;
       }
       
       if (taskType === 'social' && !socialMedia) {
-        alert('Sélectionnez un réseau social');
+        showNotification('Sélectionnez un réseau social', 'warning');
         return;
       }
       
       try {
+        // Vérifier le solde de dépôt
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.data();
+        
+        if (userData.depot < budget) {
+          showNotification('Solde de dépôt insuffisant', 'warning');
+          return;
+        }
+        
+        // Déduire le budget du solde de dépôt
+        await updateDoc(userRef, {
+          depot: userData.depot - budget
+        });
+        
+        // Créer la tâche
         await addDoc(collection(db,'tasks'),{
           publisher: userId,
           publisherName: userName,
@@ -1683,14 +1785,16 @@
           status: 'active',
           createdAt: serverTimestamp()
         });
-        alert('Asa navoaka!');
+        
+        showNotification('Asa navoaka!', 'success');
         loadPublications();
+        loadBalances();
         
         // Reset form
         e.target.reset();
         socialMediaContainer.style.display = 'none';
       } catch (error) {
-        alert("Erreur lors de la publication: " + error.message);
+        showNotification("Erreur lors de la publication: " + error.message, 'danger');
       }
     });
 
@@ -1791,11 +1895,22 @@
         
         if (type === 'depot') {
           await updateDoc(uRef, {depot: u.depot + d.montant});
+          showNotification('Dépôt confirmé!', 'success');
         } else if (type === 'retrait') {
           await updateDoc(uRef, {depot: u.depot - (d.montant + d.frais)});
+          showNotification('Retrait confirmé!', 'success');
         } else if (type === 'proof') {
-          // Mettre à jour le solde de gain
-          await updateDoc(uRef, {gain: u.gain + 50});
+          // Récupérer la tâche pour obtenir le budget
+          const taskRef = doc(db, 'tasks', d.taskId);
+          const taskSnap = await getDoc(taskRef);
+          if (!taskSnap.exists()) {
+            throw new Error('Tâche introuvable');
+          }
+          const taskData = taskSnap.data();
+          const taskBudget = taskData.budget;
+          
+          // Mettre à jour le solde de gains
+          await updateDoc(uRef, {gain: u.gain + taskBudget});
           
           // Ajouter la tâche complétée à la liste de l'utilisateur
           const completedTasks = u.completedTasks || [];
@@ -1803,23 +1918,24 @@
             completedTasks.push(d.taskId);
             await updateDoc(uRef, {completedTasks});
           }
+          
+          showNotification(`Tâche confirmée! ${taskBudget} Ar crédités.`, 'success');
         }
         
-        alert('Nohamarina!');
         loadAdminPanel();
         loadBalances();
       } catch (error) {
-        alert("Erreur lors de la confirmation: " + error.message);
+        showNotification("Erreur lors de la confirmation: " + error.message, 'danger');
       }
     };
 
     window.cancelAction = async (col, id) => {
       try {
         await deleteDoc(doc(db, col, id));
-        alert('Nofoanana');
+        showNotification('Demande annulée', 'info');
         loadAdminPanel();
       } catch (error) {
-        alert("Erreur lors de l'annulation: " + error.message);
+        showNotification("Erreur lors de l'annulation: " + error.message, 'danger');
       }
     };
 
@@ -1841,7 +1957,7 @@
       const link = document.getElementById('referralLink');
       link.select();
       document.execCommand('copy');
-      alert('Lien copié dans le presse-papiers!');
+      showNotification('Lien copié dans le presse-papiers!', 'success');
     }
 
     function shareReferral() {
@@ -1857,13 +1973,31 @@
       }
     }
 
+    // Fonction d'affichage de notification
+    function showNotification(message, type) {
+      const notificationArea = document.getElementById('notificationArea');
+      const notification = document.createElement('div');
+      notification.className = `notification bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'danger'}`;
+      notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'}"></i>
+        <span>${message}</span>
+      `;
+      
+      notificationArea.appendChild(notification);
+      
+      // Supprimer la notification après 3 secondes
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
     // Vérifier le paramètre de référence dans l'URL
     function checkReferral() {
       const urlParams = new URLSearchParams(window.location.search);
       const ref = urlParams.get('ref');
       if (ref) {
         document.getElementById('securityCode').value = ref;
-        alert('Vous avez été invité par un parrain! Utilisez le code d\'accès pour bénéficier des avantages.');
+        showNotification("Vous avez été invité par un parrain! Utilisez le code d'accès pour bénéficier des avantages.", "info");
       }
     }
 

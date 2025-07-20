@@ -15,6 +15,7 @@
       --primary-light: #edf2ff;
       --secondary: #3f37c9;
       --success: #4cc9f0;
+      --success-dark: #3ab4d8;
       --warning: #f72585;
       --danger: #e63946;
       --light: #f8f9fa;
@@ -32,6 +33,8 @@
       --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
       --box-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12);
       --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --whatsapp: #25D366;
+      --whatsapp-dark: #128C7E;
     }
     
     * {
@@ -695,7 +698,7 @@
     .instagram { color: #e1306c; }
     .telegram { color: #0088cc; }
     .website { color: var(--primary); }
-    .whatsapp { color: #25D366; }
+    .whatsapp { color: var(--whatsapp); }
     
     .task-type-badge {
       position: absolute;
@@ -718,7 +721,7 @@
     }
     
     .whatsapp-btn {
-      background: #25D366 !important;
+      background: var(--whatsapp) !important;
       color: white !important;
       border-radius: 50px;
       padding: 0.75rem 1.5rem;
@@ -734,7 +737,7 @@
     }
     
     .whatsapp-btn:hover {
-      background: #128C7E !important;
+      background: var(--whatsapp-dark) !important;
       transform: translateY(-3px);
       box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
     }
@@ -782,6 +785,58 @@
       gap: 8px;
     }
     
+    .whatsapp-section {
+      background: linear-gradient(135deg, var(--whatsapp), var(--whatsapp-dark));
+      color: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .whatsapp-input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 1rem;
+    }
+    
+    .whatsapp-input-group input {
+      flex: 1;
+      border-radius: 10px;
+      border: none;
+      padding: 0.85rem 1.25rem;
+      font-size: 1rem;
+    }
+    
+    .whatsapp-input-group button {
+      border-radius: 10px;
+      background: white;
+      color: var(--whatsapp);
+      border: none;
+      padding: 0 1.5rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    
+    .whatsapp-input-group button:hover {
+      background: var(--gray-100);
+      transform: translateY(-2px);
+    }
+    
+    .admin-task-id {
+      background: var(--primary-light);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    .admin-task-id:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
     @media (max-width: 768px) {
       .section-card {
         padding: 1.5rem;
@@ -813,6 +868,10 @@
       .login-container {
         margin: 60px auto;
         padding: 1.75rem;
+      }
+      
+      .whatsapp-input-group {
+        flex-direction: column;
       }
     }
     
@@ -850,7 +909,7 @@
         <div class="mb-3">
           <label for="securityCode" class="form-label">Teny miafina</label>
           <input type="password" class="form-control" id="securityCode" required>
-          <div class="form-text">Admin: Rakoto12</div>
+          <div class="form-text"></div>
         </div>
         
         <button type="submit" class="btn btn-primary w-100" style="background: var(--primary); border: none; padding: 0.85rem; font-weight: 600; border-radius: 10px;">
@@ -1097,6 +1156,26 @@
           </form>
         </div>
         
+        <!-- Nouvelle section WhatsApp -->
+        <div class="section-card mb-4">
+          <div class="whatsapp-section">
+            <h5><i class="fab fa-whatsapp me-2"></i>Configuration WhatsApp</h5>
+            <p>Spécifiez le numéro WhatsApp où les preuves doivent être envoyées</p>
+            
+            <div class="whatsapp-input-group">
+              <input type="tel" id="pubWhatsApp" class="form-control" placeholder="261XXXXXXXXX" required>
+              <button type="button" id="saveWhatsAppBtn">
+                <i class="fas fa-save me-1"></i> Enregistrer
+              </button>
+            </div>
+            
+            <div class="proof-container mt-3">
+              <p class="proof-title"><i class="fas fa-info-circle"></i> Les preuves seront envoyées à ce numéro WhatsApp</p>
+              <p class="small">Après avoir enregistré le numéro, il sera utilisé pour toutes les publications suivantes.</p>
+            </div>
+          </div>
+        </div>
+        
         <h5 class="mt-4 mb-3"><i class="fas fa-list me-2"></i>Mes Publications</h5>
         <div id="publicationList" class="row">
           <div class="col-12">
@@ -1220,7 +1299,7 @@
               
               <div class="proof-container">
                 <p class="proof-title"><i class="fas fa-info-circle"></i> Envoyer une capture d'écran par WhatsApp</p>
-                <a href="https://wa.me/261384557584" target="_blank" class="btn whatsapp-btn">
+                <a href="#" id="whatsappProofBtn" target="_blank" class="btn whatsapp-btn">
                   <i class="fab fa-whatsapp"></i> Envoyer par WhatsApp
                 </a>
                 <p class="mt-2 small">Après avoir envoyé votre capture d'écran sur WhatsApp, soumettez votre nom ci-dessus pour que nous puissions vous créditer.</p>
@@ -1231,6 +1310,40 @@
               <button type="submit" class="btn btn-primary" style="background: var(--primary); border: none; padding: 0.65rem 1.25rem; font-weight: 600; border-radius: 10px;">Envoyer</button>
             </div>
           </form>
+        </div>
+      </div>
+      
+      <!-- Confirmation Modal -->
+      <div class="modal fade" id="confirmationModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header card-header-gradient">
+              <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Confirmer la Soumission</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">ID de la Tâche</label>
+                <div class="admin-task-id" id="confirmationTaskId">Chargement...</div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Nom du Participant</label>
+                <input type="text" class="form-control" id="confirmationName" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Lien de Preuve</label>
+                <input type="text" class="form-control" id="confirmationProof" readonly>
+              </div>
+              <div class="text-center mt-4">
+                <button class="btn btn-success me-2" id="confirmSubmissionBtn">
+                  <i class="fas fa-check me-1"></i> Confirmer
+                </button>
+                <button class="btn btn-danger" id="cancelSubmissionBtn">
+                  <i class="fas fa-times me-1"></i> Annuler
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1276,6 +1389,7 @@
     let userId = "";
     let isAdmin = false;
     let userName = "";
+    let userWhatsApp = "";
 
     // Page elements
     const loginPage = document.getElementById('loginPage');
@@ -1284,6 +1398,7 @@
     const welcomeMessage = document.getElementById('welcomeMessage');
     const taskTypeSelect = document.getElementById('taskType');
     const socialMediaContainer = document.getElementById('socialMediaContainer');
+    const saveWhatsAppBtn = document.getElementById('saveWhatsAppBtn');
 
     // Gestion du type de tâche
     taskTypeSelect.addEventListener('change', function() {
@@ -1324,6 +1439,7 @@
         userId = userData.id;
         userName = userData.name;
         isAdmin = userData.isAdmin;
+        userWhatsApp = userData.whatsapp || "";
         
         // Masquer la page de connexion et afficher l'application
         loginPage.style.display = 'none';
@@ -1376,7 +1492,8 @@
             depot: 0,
             createdAt: serverTimestamp(),
             isAdmin: adminAccess,
-            completedTasks: [] // Liste des tâches complétées
+            completedTasks: [],
+            whatsapp: ""
           });
         }
         
@@ -1388,12 +1505,14 @@
         userId = userID;
         userName = userData.name;
         isAdmin = userData.isAdmin || adminAccess;
+        userWhatsApp = userData.whatsapp || "";
         
         // Sauvegarder dans localStorage
         localStorage.setItem('milaVolaUser', JSON.stringify({
           id: userId,
           name: userName,
-          isAdmin: isAdmin
+          isAdmin: isAdmin,
+          whatsapp: userWhatsApp
         }));
         
         // Mettre à jour le message de bienvenue
@@ -1592,13 +1711,14 @@
                 <span class="task-badge">${d.budget} Ar</span>
                 <h6 class="card-title">${icon} ${d.description}</h6>
                 <small class="d-block text-muted mb-2">Conditions: ${d.cond || 'Aucune'}</small>
+                <div class="small mt-2">ID: ${taskId.substring(0,8)}...</div>
                 <div class="mt-2">
                   <a href="${d.url}" target="_blank" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-external-link-alt me-1"></i> Accéder à la tâche
                   </a>
                 </div>
                 ${isCompleted ? '' : `
-                <button class='btn btn-primary w-100 mt-3' onclick='openProofModal("${taskId}")'>
+                <button class='btn btn-primary w-100 mt-3' onclick='openProofModal("${taskId}", "${d.whatsapp || ''}")'>
                   <i class="fas fa-paper-plane me-1"></i> Envoyer preuve
                 </button>
                 `}
@@ -1649,10 +1769,44 @@
       }
     });
 
-    window.openProofModal = id => {
+    window.openProofModal = async (id, whatsapp) => {
       document.getElementById('taskIdHidden').value = id;
+      
+      // Mettre à jour le lien WhatsApp
+      const whatsappBtn = document.getElementById('whatsappProofBtn');
+      const defaultMessage = "Nanatanteraka ny asa tamin'ny Microtâche Mila Vola aho. Izao ny porofoko:";
+      
+      if (whatsapp) {
+        whatsappBtn.href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(defaultMessage)}`;
+      } else {
+        whatsappBtn.href = "https://wa.me/261384557584";
+      }
+      
+      // Ouvrir la modal
       new bootstrap.Modal(document.getElementById('proofModal')).show();
     };
+
+    // --- Gestion WhatsApp ---
+    saveWhatsAppBtn.addEventListener('click', async () => {
+      const whatsapp = document.getElementById('pubWhatsApp').value.trim();
+      
+      if (!whatsapp || whatsapp.length < 10) {
+        showNotification("Ampidiro ny laharana WhatsApp araka ny tokony ho izy", "warning");
+        return;
+      }
+      
+      try {
+        const userRef = doc(db, "users", userId);
+        await updateDoc(userRef, {
+          whatsapp: whatsapp
+        });
+        
+        userWhatsApp = whatsapp;
+        showNotification("Laharana WhatsApp voarakitra!", "success");
+      } catch (error) {
+        showNotification("Erreur lors de l'enregistrement: " + error.message, "danger");
+      }
+    });
 
     // --- Section Publication ---
     async function loadPublications() {
@@ -1678,6 +1832,7 @@
         list.innerHTML = '';
         snap.forEach(docSnap => {
           const d = docSnap.data();
+          const taskId = docSnap.id;
           const el = document.createElement('div');
           el.className = 'col-md-6 mb-3';
           
@@ -1717,6 +1872,8 @@
                   <span class="badge bg-success">Active</span>
                 </div>
                 <div class="mt-2 small">${typeText}</div>
+                <div class="mt-2 small">WhatsApp: ${d.whatsapp || 'Non configuré'}</div>
+                <div class="admin-task-id" onclick="copyToClipboard('${taskId}')">ID: ${taskId.substring(0,8)}...</div>
                 <div class="mt-2">
                   <a href="${d.url}" target="_blank" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-external-link-alt me-1"></i> Voir la tâche
@@ -1727,6 +1884,11 @@
           `;
           list.appendChild(el);
         });
+        
+        // Préremplir le champ WhatsApp
+        if (userWhatsApp) {
+          document.getElementById('pubWhatsApp').value = userWhatsApp;
+        }
       } catch (error) {
         console.error("Error loading publications:", error);
       }
@@ -1783,6 +1945,7 @@
           taskType,
           socialMedia: taskType === 'social' ? socialMedia : '',
           status: 'active',
+          whatsapp: userWhatsApp,
           createdAt: serverTimestamp()
         });
         
@@ -1868,7 +2031,7 @@
               <td>${d.taskId || 'Inconnue'}</td>
               <td>${date}</td>
               <td class="admin-actions">
-                <button class='btn btn-success btn-sm me-1' onclick='confirmAction("${col}","${docSnap.id}","${type}",${JSON.stringify(d)})'>
+                <button class='btn btn-success btn-sm me-1' onclick='openConfirmationModal("${docSnap.id}",${JSON.stringify(d)})'>
                   <i class="fas fa-check me-1"></i>
                 </button>
                 <button class='btn btn-danger btn-sm' onclick='cancelAction("${col}","${docSnap.id}")'>
@@ -1884,6 +2047,26 @@
         console.error(`Error loading ${col}:`, error);
       }
     }
+
+    window.openConfirmationModal = (submissionId, submissionData) => {
+      document.getElementById('confirmationTaskId').textContent = submissionData.taskId || 'Inconnu';
+      document.getElementById('confirmationName').value = submissionData.name || 'Non spécifié';
+      document.getElementById('confirmationProof').value = submissionData.proof || 'Aucun lien';
+      
+      // Configurer les boutons de confirmation
+      document.getElementById('confirmSubmissionBtn').onclick = () => {
+        confirmAction('submissions', submissionId, 'proof', submissionData);
+        bootstrap.Modal.getInstance(document.getElementById('confirmationModal')).hide();
+      };
+      
+      document.getElementById('cancelSubmissionBtn').onclick = () => {
+        cancelAction('submissions', submissionId);
+        bootstrap.Modal.getInstance(document.getElementById('confirmationModal')).hide();
+      };
+      
+      // Ouvrir la modal
+      new bootstrap.Modal(document.getElementById('confirmationModal')).show();
+    };
 
     window.confirmAction = async (col, id, type, d) => {
       try {
@@ -1952,7 +2135,12 @@
       });
     }
 
-    // Fonctions pour le parrainage
+    // Fonctions utilitaires
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text);
+      showNotification('ID copié dans le presse-papiers!', 'success');
+    }
+    
     function copyReferralLink() {
       const link = document.getElementById('referralLink');
       link.select();
@@ -2007,3 +2195,766 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat Mila Vola</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', 'Roboto', sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #1a2a6c, #2a4365);
+      color: #333;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at top right, rgba(106, 17, 203, 0.15), transparent 70%),
+                  radial-gradient(circle at bottom left, rgba(52, 152, 219, 0.15), transparent 70%);
+      z-index: -1;
+    }
+    
+    header {
+      background: linear-gradient(to right, #4A00E0, #8E2DE2);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .logo i {
+      font-size: 2.5rem;
+      color: #FFD700;
+    }
+    
+    .logo h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+    
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 20px;
+    }
+    
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 15px;
+      border-radius: 20px;
+      transition: background 0.3s;
+    }
+    
+    nav a:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .hero {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      text-align: center;
+      color: white;
+    }
+    
+    .hero h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+    
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin: 60px 0;
+    }
+    
+    .feature-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 30px;
+      width: 280px;
+      text-align: center;
+      transition: transform 0.3s;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-10px);
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .feature-card i {
+      font-size: 3rem;
+      color: #8E2DE2;
+      margin-bottom: 20px;
+    }
+    
+    .feature-card h3 {
+      color: white;
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+    }
+    
+    .feature-card p {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 1rem;
+    }
+    
+    .how-it-works {
+      max-width: 1000px;
+      margin: 60px auto;
+      padding: 0 20px;
+      color: white;
+      text-align: center;
+    }
+    
+    .how-it-works h2 {
+      font-size: 2.2rem;
+      margin-bottom: 40px;
+    }
+    
+    .steps {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+    
+    .step {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 25px;
+      width: 280px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .step-number {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(to right, #4A00E0, #8E2DE2);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    
+    .step h3 {
+      margin: 15px 0;
+      font-size: 1.3rem;
+    }
+    
+    .step p {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    footer {
+      background: rgba(0, 0, 0, 0.2);
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      padding: 20px;
+      margin-top: auto;
+    }
+    
+    /* Icône flottante */
+    .floating-chat-icon {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(to right, #4A00E0, #8E2DE2);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      z-index: 1000;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .floating-chat-icon:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    
+    .floating-chat-icon .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      color: white;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+      box-shadow: 0 3px 8px rgba(255, 75, 43, 0.4);
+      z-index: 10;
+    }
+    
+    /* Modal de chat */
+    .chat-modal {
+      position: fixed;
+      bottom: 115px;
+      right: 30px;
+      width: 350px;
+      height: 450px;
+      background: rgba(247, 249, 252, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      z-index: 999;
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .chat-modal.open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+    
+    .chat-modal-header {
+      background: linear-gradient(to right, #4A00E0, #8E2DE2);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 20px 20px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .chat-modal-header h3 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 1.3rem;
+    }
+    
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+    
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .modal-chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      background: rgba(245, 247, 250, 0.8);
+    }
+    
+    .modal-input-container {
+      padding: 12px;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+    }
+    
+    .modal-message-input {
+      flex: 1;
+      padding: 12px 15px;
+      border: none;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      background: #f5f7ff;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+    
+    .modal-message-input:focus {
+      outline: none;
+      box-shadow: inset 0 2px 10px rgba(74, 0, 224, 0.1);
+    }
+    
+    .send-btn {
+      background: linear-gradient(to right, #4A00E0, #8E2DE2);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      margin-left: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: transform 0.3s;
+    }
+    
+    .send-btn:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Style pour les messages */
+    .message {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      position: relative;
+      animation: fadeIn 0.4s;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      line-height: 1.4;
+      font-size: 1rem;
+    }
+    
+    .message.sent {
+      align-self: flex-end;
+      background: linear-gradient(to right, #4A00E0, #8E2DE2);
+      color: white;
+      border-bottom-right-radius: 5px;
+    }
+    
+    .message.received {
+      align-self: flex-start;
+      background: white;
+      color: #333;
+      border: 1px solid #eaeaea;
+      border-bottom-left-radius: 5px;
+    }
+    
+    .message .sender {
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+      display: block;
+    }
+    
+    .message.sent .sender {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .message.received .sender {
+      color: #7e57c2;
+    }
+    
+    .message .time {
+      font-size: 0.7rem;
+      text-align: right;
+      margin-top: 5px;
+      opacity: 0.7;
+    }
+    
+    .message.sent .time {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .message.received .time {
+      color: #777;
+    }
+    
+    .new-message-notification {
+      background: linear-gradient(to right, #4A00E0, #8E2DE2);
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.9rem;
+      animation: fadeIn 0.5s;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: none;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+      40% {transform: translateY(-15px);}
+      60% {transform: translateY(-7px);}
+    }
+    
+    .bounce {
+      animation: bounce 0.8s;
+    }
+    
+    /* Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 998;
+      display: none;
+    }
+    
+    .modal-overlay.active {
+      display: block;
+    }
+    
+    /* Scrollbar */
+    .modal-chat-box::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .modal-chat-box::-webkit-scrollbar-track {
+      background: rgba(245, 247, 250, 0.5);
+      border-radius: 3px;
+    }
+    
+    .modal-chat-box::-webkit-scrollbar-thumb {
+      background: linear-gradient(to bottom, #8E2DE2, #4A00E0);
+      border-radius: 3px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .feature-card, .step {
+        width: 100%;
+        max-width: 350px;
+      }
+      
+      .chat-modal {
+        width: 90%;
+        right: 5%;
+        height: 70vh;
+        bottom: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <i class="fas fa-comments"></i>
+        <h1>Mila Vola</h1>
+      
+  <footer>
+    <p>Chat Mila Vola &copy; 2023 - Tous droits réservés</p>
+  </footer>
+  
+  <!-- Icône flottante avec badge -->
+  <div class="floating-chat-icon" id="chatIcon">
+    <i class="fas fa-comments"></i>
+    <div class="badge" id="messageBadge">0</div>
+  </div>
+  
+  <!-- Modal de chat -->
+  <div class="chat-modal" id="chatModal">
+    <div class="chat-modal-header">
+      <h3>Chat Mila Vola</h3>
+      <button class="modal-close-btn" id="closeModal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div id="newMessageNotification" class="new-message-notification">
+      Vous avez un nouveau message!
+    </div>
+    
+    <div class="modal-chat-box" id="modalChatBox"></div>
+    
+    <div class="modal-input-container">
+      <input type="text" class="modal-message-input" id="modalMessageInput" placeholder="Ampidiro ny hafatra..." />
+      <button class="send-btn" id="sendMessageBtn">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Overlay pour fermer la modal -->
+  <div class="modal-overlay" id="modalOverlay"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore-compat.js"></script>
+  
+  <script>
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAC-P6WFH1kqfYQi3PdCWpy4LSUqvtX_vo",
+      authDomain: "mila-vola.firebaseapp.com",
+      projectId: "mila-vola",
+      storageBucket: "mila-vola.appspot.com",
+      messagingSenderId: "690624768352",
+      appId: "1:690624768352:web:668994ef2664c5b99dd605",
+      measurementId: "G-C3FZTKQHFP"
+    };
+
+    // Initialiser Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Éléments DOM
+    const chatIcon = document.getElementById("chatIcon");
+    const messageBadge = document.getElementById("messageBadge");
+    const chatModal = document.getElementById("chatModal");
+    const closeModal = document.getElementById("closeModal");
+    const modalChatBox = document.getElementById("modalChatBox");
+    const modalMessageInput = document.getElementById("modalMessageInput");
+    const modalOverlay = document.getElementById("modalOverlay");
+    const newMessageNotification = document.getElementById("newMessageNotification");
+    const sendMessageBtn = document.getElementById("sendMessageBtn");
+    
+    let unreadCount = 0;
+    let modalOpen = false;
+    let userName = "";
+    
+    // Demander le nom d'utilisateur
+    function getUserName() {
+      userName = localStorage.getItem('chatUserName');
+      
+      if (!userName) {
+        userName = prompt("Ampidiro ny anaranao:");
+        if (userName) {
+          localStorage.setItem('chatUserName', userName);
+        } else {
+          userName = "Mpampiasa";
+        }
+      }
+    }
+    
+    // Ajouter un message dans la modal
+    function addMessageToModal(sender, message, time, isReceived) {
+      const msg = document.createElement("div");
+      msg.className = `message ${isReceived ? 'received' : 'sent'}`;
+      
+      msg.innerHTML = `
+        <span class="sender">${sender}</span>
+        <div class="content">${message}</div>
+        <div class="time">${time}</div>
+      `;
+      
+      modalChatBox.appendChild(msg);
+      modalChatBox.scrollTop = modalChatBox.scrollHeight;
+    }
+    
+    // Ouvrir la modal au clic sur l'icône
+    chatIcon.addEventListener("click", () => {
+      chatModal.classList.add("open");
+      modalOverlay.classList.add("active");
+      modalOpen = true;
+      
+      // Réinitialiser le compteur de messages non lus
+      unreadCount = 0;
+      updateBadge();
+      
+      // Cacher la notification
+      newMessageNotification.style.display = "none";
+    });
+    
+    // Fermer la modal
+    closeModal.addEventListener("click", closeChatModal);
+    modalOverlay.addEventListener("click", closeChatModal);
+    
+    function closeChatModal() {
+      chatModal.classList.remove("open");
+      modalOverlay.classList.remove("active");
+      modalOpen = false;
+    }
+    
+    // Mettre à jour le badge de notification
+    function updateBadge() {
+      messageBadge.textContent = unreadCount;
+      
+      if (unreadCount > 0) {
+        messageBadge.style.display = "flex";
+        messageBadge.classList.add("bounce");
+        setTimeout(() => {
+          messageBadge.classList.remove("bounce");
+        }, 800);
+      } else {
+        messageBadge.style.display = "none";
+      }
+    }
+    
+    // Envoyer un message à Firebase
+    async function sendMessage() {
+      const message = modalMessageInput.value;
+      if (!message.trim()) return;
+      
+      // Ajouter le message à Firebase
+      try {
+        await db.collection("chatMessages").add({
+          sender: userName,
+          receiver: "admin",
+          message: message,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        modalMessageInput.value = "";
+      } catch (error) {
+        console.error("Erreur lors de l'envoi du message:", error);
+      }
+    }
+    
+    // Envoyer avec le bouton
+    sendMessageBtn.addEventListener("click", sendMessage);
+    
+    // Envoyer avec la touche Entrée
+    modalMessageInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+    
+    // Écouter les nouveaux messages
+    function setupMessageListener() {
+      db.collection("chatMessages")
+        .orderBy("timestamp")
+        .onSnapshot((snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+              const data = change.doc.data();
+              
+              // Formater la date
+              const date = data.timestamp ? data.timestamp.toDate() : new Date();
+              const timeString = `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+              
+              // Afficher le message dans la modale
+              addMessageToModal(
+                data.sender, 
+                data.message, 
+                timeString, 
+                data.sender !== userName
+              );
+              
+              // Si c'est un message de l'admin et que la modale est fermée
+              if (data.sender !== userName && !modalOpen) {
+                unreadCount++;
+                updateBadge();
+                
+                // Jouer un son de notification
+                playNotificationSound();
+              } 
+              // Si c'est un message de l'admin et que la modale est ouverte
+              else if (data.sender !== userName && modalOpen) {
+                // Afficher la notification dans la modale
+                newMessageNotification.style.display = "block";
+                
+                // Cacher après 5 secondes
+                setTimeout(() => {
+                  newMessageNotification.style.display = "none";
+                }, 5000);
+              }
+            }
+          });
+        });
+    }
+    
+    // Jouer un son de notification
+    function playNotificationSound() {
+      const audio = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3");
+      audio.play().catch(e => console.log("Audio play error:", e));
+    }
+    
+    // Initialiser l'application
+    function initApp() {
+      getUserName();
+      setupMessageListener();
+    }
+    
+    // Démarrer l'application
+    window.addEventListener("DOMContentLoaded", initApp);
+  </script>
+</body>
+</html>
+

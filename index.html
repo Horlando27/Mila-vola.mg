@@ -1,5 +1,5 @@
 
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="mg">
 <head>
   <meta charset="UTF-8">
@@ -837,6 +837,83 @@
       color: white;
     }
     
+    /* Styles pour la section historique */
+    .history-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 1.25rem;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      border: 1px solid var(--gray-200);
+    }
+    
+    .history-table th {
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    .history-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .history-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .history-table tr:nth-child(even) {
+      background-color: var(--gray-100);
+    }
+    
+    .history-table tr:hover {
+      background-color: var(--primary-light);
+    }
+    
+    .history-badge {
+      padding: 0.35rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .badge-deposit {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    
+    .badge-withdraw {
+      background: #fce4ec;
+      color: #e91e63;
+    }
+    
+    .badge-proof {
+      background: #e8f5e9;
+      color: #4caf50;
+    }
+    
+    .badge-pending {
+      background: #fff8e1;
+      color: #ffa000;
+    }
+    
+    .badge-confirmed {
+      background: #e8f5e9;
+      color: #4caf50;
+    }
+    
+    .badge-canceled {
+      background: #ffebee;
+      color: #f44336;
+    }
+    
+    .history-section {
+      margin-bottom: 2.5rem;
+    }
+    
     @media (max-width: 768px) {
       .section-card {
         padding: 1.5rem;
@@ -860,7 +937,7 @@
         font-size: 1.6rem;
       }
       
-      .admin-table {
+      .admin-table, .history-table {
         display: block;
         overflow-x: auto;
       }
@@ -978,6 +1055,8 @@
         <a class="nav-link" href="#tasksSection" onclick="showSection('tasksSection')"><i class="fas fa-tasks me-1"></i> Asa</a>
         <a class="nav-link" href="#publicationSection" onclick="showSection('publicationSection')"><i class="fas fa-bullhorn me-1"></i> Publication</a>
         <a class="nav-link" href="#settingsSection" onclick="showSection('settingsSection')"><i class="fas fa-sliders-h me-1"></i> Paramètres</a>
+        <!-- Nouvel onglet Historique -->
+        <a class="nav-link" href="#historySection" onclick="showSection('historySection'); loadHistory()"><i class="fas fa-history me-1"></i> Historique</a>
       </nav>
 
       <!-- Admin Section -->
@@ -1116,7 +1195,7 @@
             
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">Budget (≥ 50 Ar)</label>
+                <label class="form-label">Budget (≥ 10Ar)</label>
                 <input id="pubBudget" type="number" class="form-control" placeholder="Ex: 100" required>
               </div>
               <div class="col-md-6 mb-3">
@@ -1213,6 +1292,92 @@
         </div>
       </div>
 
+      <!-- Nouvelle section Historique -->
+      <div id="historySection" class="mb-5" style="display:none;">
+        <h4 class="section-title"><i class="fas fa-history me-2"></i>Historique des Transactions</h4>
+        
+        <!-- Historique des Dépôts -->
+        <div class="history-section">
+          <h5 class="mb-3"><i class="fas fa-money-bill-wave me-2"></i>Historique des Dépôts</h5>
+          <div class="table-responsive">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Montant</th>
+                  <th>Méthode</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="depositHistory">
+                <tr>
+                  <td colspan="4" class="text-center py-4">
+                    <div class="empty-state py-0">
+                      <i class="fas fa-spinner fa-spin"></i>
+                      <p>Chargement de l'historique des dépôts...</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Historique des Retraits -->
+        <div class="history-section">
+          <h5 class="mb-3"><i class="fas fa-hand-holding-usd me-2"></i>Historique des Retraits</h5>
+          <div class="table-responsive">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Montant</th>
+                  <th>Frais</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="withdrawHistory">
+                <tr>
+                  <td colspan="4" class="text-center py-4">
+                    <div class="empty-state py-0">
+                      <i class="fas fa-spinner fa-spin"></i>
+                      <p>Chargement de l'historique des retraits...</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Historique des Preuves -->
+        <div class="history-section">
+          <h5 class="mb-3"><i class="fas fa-check-circle me-2"></i>Historique des Preuves</h5>
+          <div class="table-responsive">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Tâche</th>
+                  <th>Statut</th>
+                  <th>Gain</th>
+                </tr>
+              </thead>
+              <tbody id="proofHistory">
+                <tr>
+                  <td colspan="4" class="text-center py-4">
+                    <div class="empty-state py-0">
+                      <i class="fas fa-spinner fa-spin"></i>
+                      <p>Chargement de l'historique des preuves...</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- Modals -->
       <!-- Deposit Modal -->
       <div class="modal fade" id="depositModal" tabindex="-1">
@@ -1263,7 +1428,7 @@
                 <input id="withdrawPhone" type="tel" class="form-control" placeholder="Votre numéro" required>
               </div>
               <div class="mb-3">
-                <label class="form-label">Montant (≥ 10000 Ar)</label>
+                <label class="form-label">Montant (≥ 1000 Ar)</label>
                 <input id="withdrawAmount" type="number" class="form-control" placeholder="Ex: 20000" required>
                 <div class="form-text">Frais: 10% du montant</div>
                 <div class="form-text text-danger">Attention: Seul le solde de gains peut être retiré</div>
@@ -1417,6 +1582,7 @@
       document.getElementById('tasksSection').style.display = 'none';
       document.getElementById('publicationSection').style.display = 'none';
       document.getElementById('settingsSection').style.display = 'none';
+      document.getElementById('historySection').style.display = 'none';
       
       // Afficher la section demandée
       document.getElementById(sectionId).style.display = 'block';
@@ -1615,7 +1781,7 @@
           return;
         }
         
-        if (montant >= 10000) {
+        if (montant >= 1000) {
           const frais = montant * 0.1;
           await addDoc(collection(db, "retrait_requests"), {
             userId, userName, nom, phone, montant, frais,
@@ -1903,7 +2069,7 @@
       const taskType = document.getElementById('taskType').value;
       const socialMedia = document.getElementById('socialMedia').value;
       
-      if (budget < 50) {
+      if (budget < 10) {
         showNotification('Budget ≥ 50 Ar', 'warning');
         return;
       }
@@ -2047,6 +2213,113 @@
         console.error(`Error loading ${col}:`, error);
       }
     }
+
+    // --- Section Historique ---
+    async function loadHistory() {
+      try {
+        // Charger l'historique des dépôts
+        const depositQuery = query(collection(db, "depot_requests"), where("userId", "==", userId));
+        const depositSnap = await getDocs(depositQuery);
+        const depositList = document.getElementById('depositHistory');
+        depositList.innerHTML = '';
+        
+        if (depositSnap.empty) {
+          depositList.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-center py-4">
+                <div class="empty-state py-0">
+                  <i class="fas fa-inbox"></i>
+                  <p>Aucun historique de dépôt</p>
+                </div>
+              </td>
+            </tr>
+          `;
+        } else {
+          depositSnap.forEach(doc => {
+            const d = doc.data();
+            const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${date}</td>
+              <td>${d.montant} Ar</td>
+              <td>${d.method}</td>
+              <td><span class="history-badge badge-${d.status === 'confirmé' ? 'confirmed' : d.status === 'en attente' ? 'pending' : 'canceled'}">${d.status}</span></td>
+            `;
+            depositList.appendChild(row);
+          });
+        }
+        
+        // Charger l'historique des retraits
+        const withdrawQuery = query(collection(db, "retrait_requests"), where("userId", "==", userId));
+        const withdrawSnap = await getDocs(withdrawQuery);
+        const withdrawList = document.getElementById('withdrawHistory');
+        withdrawList.innerHTML = '';
+        
+        if (withdrawSnap.empty) {
+          withdrawList.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-center py-4">
+                <div class="empty-state py-0">
+                  <i class="fas fa-inbox"></i>
+                  <p>Aucun historique de retrait</p>
+                </div>
+              </td>
+            </tr>
+          `;
+        } else {
+          withdrawSnap.forEach(doc => {
+            const d = doc.data();
+            const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${date}</td>
+              <td>${d.montant} Ar</td>
+              <td>${d.frais || 0} Ar</td>
+              <td><span class="history-badge badge-${d.status === 'confirmé' ? 'confirmed' : d.status === 'en attente' ? 'pending' : 'canceled'}">${d.status}</span></td>
+            `;
+            withdrawList.appendChild(row);
+          });
+        }
+        
+        // Charger l'historique des preuves
+        const proofQuery = query(collection(db, "submissions"), where("userId", "==", userId));
+        const proofSnap = await getDocs(proofQuery);
+        const proofList = document.getElementById('proofHistory');
+        proofList.innerHTML = '';
+        
+        if (proofSnap.empty) {
+          proofList.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-center py-4">
+                <div class="empty-state py-0">
+                  <i class="fas fa-inbox"></i>
+                  <p>Aucun historique de preuve</p>
+                </div>
+              </td>
+            </tr>
+          `;
+        } else {
+          proofSnap.forEach(doc => {
+            const d = doc.data();
+            const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${date}</td>
+              <td>${d.taskId.substring(0, 8)}...</td>
+              <td><span class="history-badge badge-${d.status === 'confirmé' ? 'confirmed' : d.status === 'en attente' ? 'pending' : 'canceled'}">${d.status}</span></td>
+              <td>${d.status === 'confirmé' ? '50 Ar' : '-'}</td>
+            `;
+            proofList.appendChild(row);
+          });
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement de l'historique:", error);
+        showNotification("Erreur lors du chargement de l'historique", "danger");
+      }
+    }
+
+    // Ajout de la fonction à l'objet window pour la rendre accessible globalement
+    window.loadHistory = loadHistory;
 
     window.openConfirmationModal = (submissionId, submissionData) => {
       document.getElementById('confirmationTaskId').textContent = submissionData.taskId || 'Inconnu';
@@ -2195,15 +2468,6 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
 
 
 <!DOCTYPE html>

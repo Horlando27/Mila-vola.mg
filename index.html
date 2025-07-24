@@ -1,5 +1,5 @@
 
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="mg">
 <head>
   <meta charset="UTF-8">
@@ -914,6 +914,19 @@
       margin-bottom: 2.5rem;
     }
     
+    /* Nouveau style pour la notification d'attente */
+    .pending-notification {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-weight: 500;
+      width: 100%;
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+    
     @media (max-width: 768px) {
       .section-card {
         padding: 1.5rem;
@@ -965,6 +978,17 @@
     .delayed-1 { animation-delay: 0.1s; }
     .delayed-2 { animation-delay: 0.2s; }
     .delayed-3 { animation-delay: 0.3s; }
+    
+    /* Nouvelle animation pour le badge */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    
+    .pending-notification {
+      animation: pulse 2s infinite;
+    }
   </style>
 </head>
 <body>
@@ -1811,6 +1835,21 @@
         const userSnap = await getDoc(userRef);
         const completedTasks = userSnap.exists() ? userSnap.data().completedTasks || [] : [];
         
+        // Récupérer les soumissions en attente de l'utilisateur
+        const pendingSubmissions = new Set();
+        try {
+          const submissionsQuery = query(collection(db, "submissions"), 
+            where("userId", "==", userId),
+            where("status", "==", "en attente"));
+          const submissionsSnap = await getDocs(submissionsQuery);
+          submissionsSnap.forEach(doc => {
+            const data = doc.data();
+            pendingSubmissions.add(data.taskId);
+          });
+        } catch (error) {
+          console.error("Erreur lors du chargement des soumissions en attente:", error);
+        }
+        
         const q = query(collection(db, "tasks"), where("status","==","active"));
         const snap = await getDocs(q);
         
@@ -1833,6 +1872,8 @@
           
           // Vérifier si la tâche est déjà complétée
           const isCompleted = completedTasks.includes(taskId);
+          // Vérifier si l'utilisateur a une soumission en attente pour cette tâche
+          const isPending = pendingSubmissions.has(taskId);
           
           const el = document.createElement('div');
           el.className = isCompleted ? 'col-md-4 mb-3 completed-task' : 'col-md-4 mb-3';
@@ -1883,11 +1924,14 @@
                     <i class="fas fa-external-link-alt me-1"></i> Accéder à la tâche
                   </a>
                 </div>
-                ${isCompleted ? '' : `
-                <button class='btn btn-primary w-100 mt-3' onclick='openProofModal("${taskId}", "${d.whatsapp || ''}")'>
-                  <i class="fas fa-paper-plane me-1"></i> Envoyer preuve
-                </button>
-                `}
+                ${isCompleted ? '' : 
+                  (isPending ? 
+                    '<div class="pending-notification"><i class="fas fa-clock me-2"></i>En attente de vérification</div>' : 
+                    `<button class='btn btn-primary w-100 mt-3' onclick='openProofModal("${taskId}", "${d.whatsapp || ''}")'>
+                      <i class="fas fa-paper-plane me-1"></i> Envoyer preuve
+                    </button>`
+                  )
+                }
               </div>
             </div>
           `;
@@ -1926,6 +1970,9 @@
         });
         
         showNotification("Porofo nalefa! Ny mpitantana dia handinika azy.", "success");
+        
+        // Recharger les tâches pour afficher la notification
+        loadTasks();
         
         // Reset form and close modal
         e.target.reset();
